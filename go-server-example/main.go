@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -14,6 +15,7 @@ var (
 
 func main() {
 	http.HandleFunc("/", handleIndex)
+	http.HandleFunc("/ping", pingHandler)
 	http.HandleFunc("/add", handleAdd)
 	http.HandleFunc("/delete", handleDelete)
 	http.HandleFunc("/names", handleNames)
@@ -23,6 +25,10 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("Could not start server: %s\n", err)
 	}
+}
+
+func pingHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Pong!")
 }
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
@@ -104,4 +110,3 @@ func jsonResponse(w http.ResponseWriter, data interface{}) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
-
