@@ -1,4 +1,4 @@
-This is an xample python repo
+This is an example python repo
 
 ## Install nix
 ```
@@ -9,14 +9,14 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 ```
 To get started using Nix, open a new shell or run `. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh`
 ```
-You can experiment if the installation was successful by runing `nix run "nixpkgs#hello"`
+You can experiment if the installation was successful by running `nix run "nixpkgs#hello"`
 ## Install bsf cli 
 nix profile install {{URL}}
 
 ## Install poetry 
 nix profile install "nixpkgs#poetry"
 
-## Poety init and then add dependencies intercativly
+## Poetry init and then add dependencies intercativly
 poetry init
 After adding these interactively you will get pyproject.toml file like below, or you can directly use this file and add dependencies with specific versions required by your python application. 
 
@@ -43,13 +43,13 @@ app = "app.app:main"
 
 ```
 
-Feel free to use `poetry add $(cat requirements.txt)` to add the whol requirements.txt file later.
+Feel free to use `poetry add $(cat requirements.txt)` to add the whole requirements.txt file later.
 
 ## Generate the lock file
 Generate lock file using `poetry lock'
 
-## Initialize the projct
-Now is the time to run `bsf init` which will generate the `bsf.hcl` and `bsf.locl` files. It also generates a bsf folder with all nix files requred to build the project. 
+## Initialize the project
+Now is the time to run `bsf init` which will generate the `bsf.hcl` and `bsf.locl` files. It also generates a bsf folder with all nix files required to build the project. 
 
 ## Add files before building 
 `git add . ` <- Required by nix sandboxing.
