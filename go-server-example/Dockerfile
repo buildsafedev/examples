@@ -8,7 +8,7 @@
 
 ################################################################################
 # Create a stage for building the application.
-FROM ttl.sh/go-base:dev-5h AS build
+FROM ttl.sh/go-base:dev-5h@sha256:74bc47b1f9efc4c2d0ea20cf092c7b2d0d2b5a71713c1cb7addb24e173f10993 AS build
 WORKDIR /src
 
 COPY . /src
@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 go build -o /bin/server .
 # image from the build stage where the necessary files are copied from the build
 # stage.
 #
-FROM ttl.sh/go-base:5h AS final
+FROM ttl.sh/go-base:5h@sha256:c5343ac7f8bc74420ed919f00711f9a0c3f94f841938ad43838b938432a1f433 AS final
 
 
 # Create a non-privileged user that the app will run under.
