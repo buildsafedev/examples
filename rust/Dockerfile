@@ -10,7 +10,7 @@ ARG APP_NAME=rust-todo
 #############################
 # Create a stage for building the application.
 
-FROM ttl.sh/rust-base:dev-3h  AS build
+FROM ttl.sh/rust-base:dev-7h  AS build
 RUN mkdir -p /tmp
 ARG APP_NAME
 WORKDIR /app

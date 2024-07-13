@@ -1,6 +1,6 @@
 
 packages {
-  development = ["coreutils-full@9.5", "bash@5.2.15", "cargo@1.75.0", "gcc@~13.3.0"]
+  development = ["coreutils-full@9.5", "bash@5.2.15", "cargo@1.75.0", "rustc@~1.73.0", "libiconv@~1.17", "clang-wrapper@~18.1.8"]
   runtime     = ["cacert@3.95"]
 }
 
@@ -23,7 +23,7 @@ rustapp {
 }
 
 oci "pkgs" {
-  name          = "ttl.sh/rust-base:dev-3h"
+  name          = "ttl.sh/rust-base:dev-7h"
   cmd           = []
   entrypoint    = []
   envVars       = []
