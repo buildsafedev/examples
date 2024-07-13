@@ -1,4 +1,4 @@
-FROM ttl.sh/python-base:2h as base
+FROM ttl.sh/python-base:2h@sha256:2f45fcf729131928a4fd7ffeb9a3bcdac85cb6c9de88ef4639054b6b1717abe4 as base
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
