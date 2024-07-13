@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -21,9 +23,10 @@ func main() {
 	http.HandleFunc("/names", handleNames)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	log.Println("Starting server on :8080")
+	l := logrus.New()
+	l.Println("Starting server on :8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatalf("Could not start server: %s\n", err)
+		l.Fatalf("Could not start server: %s\n", err)
 	}
 }
 
