@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 # Create a stage for building the application.
 FROM ttl.sh/go-base:dev-5h@sha256:74bc47b1f9efc4c2d0ea20cf092c7b2d0d2b5a71713c1cb7addb24e173f10993 AS build
 WORKDIR /src
