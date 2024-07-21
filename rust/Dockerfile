@@ -28,7 +28,7 @@ cp ./target/release/$APP_NAME /bin/todo
 # image from the build stage where the necessary files are copied from the build
 # stage.
 
-FROM ttl.sh/rust-base:18h@sha256:3afc39a03c99400cebebaa5e32007e4219467beb74a348ae0b95d4e67f5de2a7 AS final
+FROM ttl.sh/rust-base:19h@sha256:3834849608901a455c808b70607df6f32e898b38d784551d0b9bb6e1b14c1af6 AS final
 
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/todo /bin/
