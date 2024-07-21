@@ -10,7 +10,7 @@ ARG APP_NAME=rust-todo
 #############################
 # Create a stage for building the application.
 
-FROM ttl.sh/rust-base:dev-7h  AS build
+FROM ttl.sh/rust-base:dev-7h@sha256:4da36557b97b49098d29d5b72113ddfffa135f9e9e00c32300ac7cfb06bd91a0  AS build
 RUN mkdir -p /tmp
 ARG APP_NAME
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY . .
 
 # Build the application.
 RUN cargo build --locked --release && \
-cp ./target/release/$APP_NAME /bin/server
+cp ./target/release/$APP_NAME /bin/todo
 
 ################################################################################
 # Create a new stage for running the application that contains the minimal
@@ -28,14 +28,11 @@ cp ./target/release/$APP_NAME /bin/server
 # image from the build stage where the necessary files are copied from the build
 # stage.
 
-FROM ttl.sh/rust-base:2h AS final
-
+FROM ttl.sh/rust-base:18h@sha256:3afc39a03c99400cebebaa5e32007e4219467beb74a348ae0b95d4e67f5de2a7 AS final
 
 # Copy the executable from the "build" stage.
-COPY --from=build /bin/server /bin/
+COPY --from=build /bin/todo /bin/
 
-# Expose the port that the application listens on.
-EXPOSE 80
 
 # What the container should run when it is started.
-CMD ["/bin/server"]
+CMD ["/bin/todo"]
