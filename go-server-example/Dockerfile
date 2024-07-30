@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Create a stage for building the application.
-FROM ttl.sh/go-base:dev-5h@sha256:74bc47b1f9efc4c2d0ea20cf092c7b2d0d2b5a71713c1cb7addb24e173f10993 AS build
+FROM ttl.sh/baseimage-go:dev-v1 AS build
 WORKDIR /src
 
 COPY . /src
@@ -12,7 +12,7 @@ RUN mkdir -p /tmp
 RUN CGO_ENABLED=0 go build -mod=vendor -o /bin/server .
 
 
-FROM ttl.sh/go-base:5h@sha256:c5343ac7f8bc74420ed919f00711f9a0c3f94f841938ad43838b938432a1f433 AS final
+FROM ttl.sh/baseimage-go:prod-v1 AS final
 
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/server /bin/
