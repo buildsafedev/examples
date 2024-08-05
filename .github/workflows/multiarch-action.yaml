@@ -53,7 +53,7 @@ jobs:
           - platform: linux/amd64
             runner: ubuntu-latest
           - platform: linux/arm64
-            runner: ubuntu-latest
+            runner: linux-arm64
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Prepare
@@ -82,23 +82,22 @@ jobs:
       - name: Install bsf
         run: |
           nix profile install github:buildsafedev/bsf
-      
-      - name: Change directory
-        run: |
-          cd go-server-example
-          
+                
       - name: Build and push image with digest
         run: |
+          cd go-server-example 
           bsf oci pkgs --push --digest --dest-creds=${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }}
       
       - name: Read digest from bsf result
         id: get_digest
         run: |
+          cd go-server-example 
           digest=$(cat bsf-result/digest)
           echo "digest=$digest" >> $GITHUB_OUTPUT
       
       - name: Export digest
         run: |
+          cd go-server-example 
           mkdir -p /tmp/digests
           digest="${{ steps.get_digest.outputs.digest }}"
           echo "Digest: $digest"
