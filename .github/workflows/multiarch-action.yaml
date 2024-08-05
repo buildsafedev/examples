@@ -130,7 +130,6 @@ jobs:
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
-          name: digests
           path: /tmp/digests
           pattern: digests-*
           merge-multiple: true
@@ -168,4 +167,4 @@ jobs:
       - name: Scan image with Grype
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-          grype ${{ env.REGISTRY_IMAGE }}:main
+          grype ${{ env.REGISTRY_IMAGE }}:multiarch-builds

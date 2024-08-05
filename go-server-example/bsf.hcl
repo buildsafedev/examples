@@ -13,7 +13,7 @@ gomodule {
 }
 
 oci "pkgs" {
-  name          = "ttl.sh/holiodin01/multiarch-baseimage"
+  name          = "docker.io/holiodin01/multiarch-baseimage"
   cmd           = []
   entrypoint    = []
   envVars       = []
