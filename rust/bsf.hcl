@@ -5,7 +5,7 @@ packages {
 }
 
 oci "pkgs" {
-  name          = "ttl.sh/rust-base"
+  name          = "docker.io/holiodin01/rust-base"
   cmd           = []
   entrypoint    = []
   envVars       = []

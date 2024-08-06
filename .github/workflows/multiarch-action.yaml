@@ -4,7 +4,7 @@ on:
   push:
 
 env:
-  REGISTRY_IMAGE: holiodin01/multiarch-baseimage
+  REGISTRY_IMAGES: docker.io/holiodin01/go-baseimage,docker.io/python-base,docker.io/rust-base
 
 jobs:
   prepare:
@@ -28,7 +28,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY_IMAGE }}
+          images: ${{ env.REGISTRY_IMAGES }}
       
       - name: Rename meta bake definition file
         run: |
@@ -82,33 +82,35 @@ jobs:
       - name: Install bsf
         run: |
           nix profile install github:buildsafedev/bsf
-                
-      - name: Build and push image with digest
-        run: |
-          cd go-server-example 
-          bsf oci pkgs --push --digest --dest-creds=${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }}
       
-      - name: Read digest from bsf result
-        id: get_digest
+      - name: Loop through registry images
         run: |
-          cd go-server-example 
-          digest=$(cat bsf-result/digest)
-          echo "digest=$digest" >> $GITHUB_OUTPUT
-      
-      - name: Export digest
-        run: |
-          cd go-server-example 
-          mkdir -p /tmp/digests
-          digest="${{ steps.get_digest.outputs.digest }}"
-          echo "Digest: $digest"
-          touch "/tmp/digests/${digest#sha256:}"
+          IFS=',' read -r -a images <<< "${{ env.REGISTRY_IMAGES }}"
+          for image in "${images[@]}"; do
+            case $image in
+              *go-baseimage*)
+                cd go-server-example
+                ;;
+              *python-base*)
+                cd python
+                ;;
+              *rust-base*)
+                cd rust
+                ;;
+            esac
+            bsf oci pkgs --push --digest --dest-creds=${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }}
+            digest=$(cat bsf-result/digest)
+            mkdir -p "/tmp/digests/${image##*/}-${{ matrix.platform }}"
+            echo $digest > "/tmp/digests/${image##*/}-${{ matrix.platform }}/digest"
+            cd ..
+          done
       
       - name: Verify digest files
         run: |
           echo "Digest files created:"
           ls -l /tmp/digests/
       
-      - name: Upload digest
+      - name: Upload digests
         uses: actions/upload-artifact@v4
         with:
           name: digests-${{ env.PLATFORM_PAIR }}
@@ -148,23 +150,43 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
-      - name: Create manifest list and push
-        working-directory: /tmp/digests
+      - name: Create Go Baseimage manifest list and push
         run: |
-          docker buildx imagetools create $(jq -cr '.target."docker-metadata-action".tags | map(select(startswith("${{ env.REGISTRY_IMAGE }}")) | "-t " + .) | join(" ")' /tmp/bake-meta.json) \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+          docker buildx imagetools create $(jq -cr '.target."docker-metadata-action".tags | map(select(startswith("docker.io/holiodin01/go-baseimage")) | "-t " + .) | join(" ")' /tmp/bake-meta.json) \
+            docker.io/holiodin01/go-baseimage@$(cat /tmp/digests/go-baseimage-linux/amd64/digest) \
+            docker.io/holiodin01/go-baseimage@$(cat /tmp/digests/go-baseimage-linux/arm64/digest)
       
-      - name: Inspect image
+      - name: Create Python Baseimage manifest list and push
         run: |
-          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:$(jq -r '.target."docker-metadata-action".args.DOCKER_META_VERSION' /tmp/bake-meta.json)
+          docker buildx imagetools create $(jq -cr '.target."docker-metadata-action".tags | map(select(startswith("docker.io/python-base")) | "-t " + .) | join(" ")' /tmp/bake-meta.json) \
+            docker.io/python-base@$(cat /tmp/digests/python-base-linux/amd64/digest) \
+            docker.io/python-base@$(cat /tmp/digests/python-base-linux/arm64/digest)
       
-      - name: Print Digest for Verification
+      - name: Create Rust Baseimage manifest list and push
         run: |
-          for file in /tmp/digests/*; do
-            echo "Digest: $(basename $file)"
+          docker buildx imagetools create $(jq -cr '.target."docker-metadata-action".tags | map(select(startswith("docker.io/rust-base")) | "-t " + .) | join(" ")' /tmp/bake-meta.json) \
+            docker.io/rust-base@$(cat /tmp/digests/rust-base-linux/amd64/digest) \
+            docker.io/rust-base@$(cat /tmp/digests/rust-base-linux/arm64/digest)
+      
+      - name: Inspect images
+        run: |
+          IFS=',' read -r -a images <<< "${{ env.REGISTRY_IMAGES }}"
+          for image in "${images[@]}"; do
+            docker buildx imagetools inspect $image
           done
       
-      - name: Scan image with Grype
+      - name: Print Digests for Verification
+        run: |
+          for dir in /tmp/digests/*; do
+            for file in "$dir"/*/digest; do
+              echo "Digest: $(basename $file)"
+            done
+          done
+      
+      - name: Scan images with Grype
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-          grype ${{ env.REGISTRY_IMAGE }}:multiarch-builds
+          IFS=',' read -r -a images <<< "${{ env.REGISTRY_IMAGES }}"
+          for image in "${images[@]}"; do
+            grype $image
+          done

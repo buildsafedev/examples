@@ -14,7 +14,7 @@ poetryapp {
 }
 
 oci "pkgs" {
-  name          = "ttl.sh/python-base:2h"
+  name          = "docker.io/holiodin01/python-base"
   cmd           = []
   entrypoint    = []
   envVars       = []
