@@ -4,7 +4,7 @@ on:
   push:
 
 env:
-  REGISTRY_IMAGES: docker.io/holiodin01/go-baseimage,docker.io/python-base,docker.io/rust-base
+  REGISTRY_IMAGES: docker.io/holiodin01/go-baseimage,docker.io/holiodin01/python-base,docker.io/holiodin01/rust-base
 
 jobs:
   prepare:
@@ -158,29 +158,21 @@ jobs:
       
       - name: Create Python Baseimage manifest list and push
         run: |
-          docker buildx imagetools create $(jq -cr '.target."docker-metadata-action".tags | map(select(startswith("docker.io/python-base")) | "-t " + .) | join(" ")' /tmp/bake-meta.json) \
-            docker.io/python-base@$(cat /tmp/digests/python-base-linux/amd64/digest) \
-            docker.io/python-base@$(cat /tmp/digests/python-base-linux/arm64/digest)
+          docker buildx imagetools create $(jq -cr '.target."docker-metadata-action".tags | map(select(startswith("docker.io/holiodin01/python-base")) | "-t " + .) | join(" ")' /tmp/bake-meta.json) \
+            docker.io/holiodin01/python-base@$(cat /tmp/digests/python-base-linux/amd64/digest) \
+            docker.io/holiodin01/python-base@$(cat /tmp/digests/python-base-linux/arm64/digest)
       
       - name: Create Rust Baseimage manifest list and push
         run: |
-          docker buildx imagetools create $(jq -cr '.target."docker-metadata-action".tags | map(select(startswith("docker.io/rust-base")) | "-t " + .) | join(" ")' /tmp/bake-meta.json) \
-            docker.io/rust-base@$(cat /tmp/digests/rust-base-linux/amd64/digest) \
-            docker.io/rust-base@$(cat /tmp/digests/rust-base-linux/arm64/digest)
+          docker buildx imagetools create $(jq -cr '.target."docker-metadata-action".tags | map(select(startswith("docker.io/holiodin01/rust-base")) | "-t " + .) | join(" ")' /tmp/bake-meta.json) \
+            docker.io/holiodin01/rust-base@$(cat /tmp/digests/rust-base-linux/amd64/digest) \
+            docker.io/holiodin01/rust-base@$(cat /tmp/digests/rust-base-linux/arm64/digest)
       
       - name: Inspect images
         run: |
           IFS=',' read -r -a images <<< "${{ env.REGISTRY_IMAGES }}"
           for image in "${images[@]}"; do
-            docker buildx imagetools inspect $image
-          done
-      
-      - name: Print Digests for Verification
-        run: |
-          for dir in /tmp/digests/*; do
-            for file in "$dir"/*/digest; do
-              echo "Digest: $(basename $file)"
-            done
+            docker buildx imagetools inspect $image:multiarch-builds
           done
       
       - name: Scan images with Grype
@@ -188,5 +180,5 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
           IFS=',' read -r -a images <<< "${{ env.REGISTRY_IMAGES }}"
           for image in "${images[@]}"; do
-            grype $image
+            grype $image:multiarch-builds
           done
