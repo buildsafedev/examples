@@ -1,4 +1,4 @@
-name: Test Custom Actions
+name: rust-base
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
         with:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: holiodin01/go-baseimage
+          image_name: holiodin01/rust-base
           tag: main
 
   build:
@@ -33,7 +33,7 @@ jobs:
         with:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          directory: 'go-server-example'
+          directory: 'rust'
 
   merge:
     needs: build
@@ -47,5 +47,5 @@ jobs:
         with:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: holiodin01/go-baseimage
+          image_name: holiodin01/rust-base
           tag: main

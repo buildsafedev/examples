@@ -1,0 +1,51 @@
+name: go-base
+
+on:
+  push:
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Prepare Action
+        uses: buildsafedev/multiarch-build--action/prepare-action@main
+        with:
+          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          image_name: holiodin01/go-baseimage
+          tag: main
+
+  build:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, linux-arm64]  
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Run Build Action
+        uses: buildsafedev/multiarch-build--action/build-action@main
+        with:
+          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          directory: 'go-server-example'
+
+  merge:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Run Merge Action
+        uses: buildsafedev/multiarch-build--action/merge-action@main
+        with:
+          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          image_name: holiodin01/go-baseimage
+          tag: main
