@@ -13,7 +13,7 @@ RUN mkdir -p /tmp
 RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -o /bin/server .
 
 # Stage 2: Create the final image
-FROM ttl.sh/baseimage-go:prod-v1 AS final
+FROM holiodin01/testbaseimg:main AS final
 
 WORKDIR /app
 
