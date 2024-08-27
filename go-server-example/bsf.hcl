@@ -13,7 +13,7 @@ gomodule {
 }
 
 oci "pkgs" {
-  name          = "docker.io/holiodin01/go-baseimage"
+  name          = "docker.io/holiodin01/go-base"
   cmd           = []
   entrypoint    = []
   envVars       = []

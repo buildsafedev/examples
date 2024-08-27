@@ -15,7 +15,7 @@ jobs:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
           image_name: holiodin01/go-baseimage
-          tag: main
+          tag: v0.1.0
 
   build:
     needs: prepare
@@ -48,4 +48,4 @@ jobs:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
           image_name: holiodin01/go-baseimage
-          tag: main
+          tag: v0.1.0
