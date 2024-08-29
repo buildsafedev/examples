@@ -12,8 +12,21 @@ gomodule {
   doCheck = false
 }
 
-oci "pkgs" {
-  name          = "docker.io/holiodin01/go-base"
+oci "go-dev" {
+  name          = "docker.io/holiodin01/bsfgobasedev"
+  layers        = ["packages.runtime + packages.dev"]
+  isBase        = true
+  cmd           = []
+  entrypoint    = []
+  envVars       = []
+  exposedPorts  = []
+  importConfigs = []
+}
+
+oci "go-runtime" {
+  name          = "ttl.sh/bsfgobaseruntime"
+  layers        = ["packages.runtime"]
+  isBase        = true
   cmd           = []
   entrypoint    = []
   envVars       = []

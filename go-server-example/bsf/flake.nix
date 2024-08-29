@@ -3,10 +3,10 @@
 	description = "";
 	
 	inputs = {
+		 nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308.url = "github:nixos/nixpkgs/d7570b04936e9b0f5268e0d834dee40368ad3308";
 		 nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7.url = "github:nixos/nixpkgs/1ebb7d7bba2953a4223956cfb5f068b0095f84a7";
 		 nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14.url = "github:nixos/nixpkgs/ac5c1886fd9fe49748d7ab80accc4c847481df14";
 		 nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4.url = "github:nixos/nixpkgs/7445ccd775d8b892fc56448d17345443a05f7fb4";
-		 nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308.url = "github:nixos/nixpkgs/d7570b04936e9b0f5268e0d834dee40368ad3308";
 			
 		nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 		 gomod2nix.url = "github:nix-community/gomod2nix";
@@ -28,10 +28,10 @@
 	
 	
 	 nix2container , 
+	 nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308, 
 	 nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7, 
 	 nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14, 
 	 nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4, 
-	 nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308, 
 	 }: let
 	  supportedSystems = [ "x86_64-linux" "aarch64-darwin" "x86_64-darwin" "aarch64-linux" ];
 	  
@@ -39,10 +39,10 @@
 	  forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
 		inherit system;
 		 nix2containerPkgs = nix2container.packages.${system}; 
+		 nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs = import nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308 { inherit system; };
 		 nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs = import nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7 { inherit system; };
 		 nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14-pkgs = import nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14 { inherit system; };
 		 nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs = import nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4 { inherit system; };
-		 nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs = import nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308 { inherit system; };
 		
 		 buildGoApplication = gomod2nix.legacyPackages.${system}.buildGoApplication;
 		pkgs = import nixpkgs { inherit system;  };
@@ -51,32 +51,14 @@
 	  });
 	in {
 	
-	packages = forEachSupportedSystem ({ pkgs,
-		 buildGoApplication, 
-		
-		
-		 nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs, 
-		 nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14-pkgs, 
-		 nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs, 
-		 nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs, 
-		 ... }: {
-		default = pkgs.callPackage ./default.nix {
-			 inherit buildGoApplication;
-			go = pkgs.go_1_22; 
-			
-			
-			
-		};
-	  });
-	
 	  devShells = forEachSupportedSystem ({ pkgs, 
 		 buildGoApplication, 
 		
 		
+		 nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs, 
 		 nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs, 
 		 nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14-pkgs, 
 		 nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs, 
-		 nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs, 
 		 ... }: {
 		devShell = pkgs.mkShell {
 		  # The Nix packages provided in the environment
@@ -96,7 +78,7 @@
 		 buildGoApplication, 
 		
 		
-		 nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs,  nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14-pkgs,  nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs,  nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs,  ... }: {
+		 nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs,  nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs,  nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14-pkgs,  nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs,  ... }: {
 		runtime = pkgs.buildEnv {
 		  name = "runtimeenv";
 		  paths = [ 
@@ -110,7 +92,7 @@
 		 buildGoApplication, 
 		
 		
-	    nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs,  nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14-pkgs,  nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs,  nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs,  ... }: {
+	    nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs,  nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs,  nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14-pkgs,  nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs,  ... }: {
 		development = pkgs.buildEnv {
 		  name = "devenv";
 		  paths = [ 
@@ -128,70 +110,77 @@
 	   
 	   
 	   
-	ociImages = forEachSupportedSystem ({ pkgs, nix2containerPkgs, system , ...}: {
-		
-		
 
-		
-		ociImage_pkgs_runtime = nix2containerPkgs.nix2container.buildImage {
-			name = "ttl.sh/holiodin01/multiarch-baseimage";
-			config = {
-				cmd = [  ];
+ociImage_dev = forEachSupportedSystem ({ pkgs, nix2containerPkgs, system ,  nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs,  nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs,  nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14-pkgs,  nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs,  ... }: {
+  
 
-				entrypoint = [  ];
-				env = [
-					
-				];
-				ExposedPorts = {
-					
-				};
-			};
-			maxLayers = 100;
-			layers = [
-				(nix2containerPkgs.nix2container.buildLayer { 
-					copyToRoot = [
-						inputs.self.runtimeEnvs.${system}.runtime
-						
-					];
-				})
-			];      
-		};
+  
+  ociImage_dev_base = nix2containerPkgs.nix2container.buildImage {
+    name = "ttl.sh/bsfgobasedev";
+    config = {
+      cmd = [  ];
+      entrypoint = [  ];
+      env = [
+        
+      ];
+      ExposedPorts = {
+        
+      };
+    };
+    maxLayers = 100;
+    layers = [
+       (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				inputs.self.runtimeEnvs.${system}.runtime
+inputs.self.devEnvs.${system}.development
+			];
+		}) 
+      
+    ];
+  };
+  
 
-		ociImage_pkgs_dev = nix2containerPkgs.nix2container.buildImage {
-			name = "ttl.sh/holiodin01/multiarch-baseimage";
-			config = {
-				cmd = [  ];
+  
+  
+  ociImage_dev_base-as-dir = pkgs.runCommand "image-as-dir" { } "${inputs.self.ociImage_dev.${system}.ociImage_dev_base.copyTo}/bin/copy-to dir:$out";
+  
+  });
 
-				entrypoint = [  ];
-				env = [
-					
-				];
-				ExposedPorts = {
-					
-				};
-			};
-			maxLayers = 100;
-			layers = [
-				(nix2containerPkgs.nix2container.buildLayer { 
-					copyToRoot = [
-						inputs.self.runtimeEnvs.${system}.runtime
-						
-						inputs.self.devEnvs.${system}.development
-					];
-				})
-			];      
-		};
-		
-		
+ociImage_runtime = forEachSupportedSystem ({ pkgs, nix2containerPkgs, system ,  nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs,  nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs,  nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14-pkgs,  nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs,  ... }: {
+  
 
-		
-		
-		
-		ociImage_pkgs_runtime-as-dir = pkgs.runCommand "image-as-dir" { } "${inputs.self.ociImages.${system}.ociImage_pkgs_runtime.copyTo}/bin/copy-to dir:$out";
-		ociImage_pkgs_dev-as-dir = pkgs.runCommand "image-as-dir" { } "${inputs.self.ociImages.${system}.ociImage_pkgs_dev.copyTo}/bin/copy-to dir:$out";
-		
-		
-	});
+  
+  ociImage_runtime_base = nix2containerPkgs.nix2container.buildImage {
+    name = "ttl.sh/bsfgobaseruntime";
+    config = {
+      cmd = [  ];
+      entrypoint = [  ];
+      env = [
+        
+      ];
+      ExposedPorts = {
+        
+      };
+    };
+    maxLayers = 100;
+    layers = [
+       (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				inputs.self.runtimeEnvs.${system}.runtime
+			];
+		}) 
+      
+    ];
+  };
+  
+
+  
+  
+  ociImage_runtime_base-as-dir = pkgs.runCommand "image-as-dir" { } "${inputs.self.ociImage_runtime.${system}.ociImage_runtime_base.copyTo}/bin/copy-to dir:$out";
+  
+  });
+
+
 
 	   
 	};

@@ -4,8 +4,22 @@ packages {
   runtime     = ["cacert@3.95", "patchelf@~0.18.0-unstable-2024-06-15"]
 }
 
-oci "pkgs" {
+
+oci "rust-dev" {
   name          = "docker.io/holiodin01/rust-base"
+  layers        = ["packages.runtime + packages.dev"]
+  isBase        = true
+  cmd           = []
+  entrypoint    = []
+  envVars       = []
+  exposedPorts  = []
+  importConfigs = []
+}
+
+oci "rust-runtime" {
+  name          = "docker.io/holiodin01/rust-base"
+  layers        = ["packages.runtime"]
+  isBase        = true
   cmd           = []
   entrypoint    = []
   envVars       = []

@@ -64,6 +64,7 @@
 		  packages =  [
 			nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.bash  
 			nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.coreutils-full  
+			nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.python3.10-pyinstaller-versionfile  
 			nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs.python312  
 			nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.python312Packages.pip  
 			
@@ -95,6 +96,7 @@
 		  paths = [ 
 			nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.bash  
 			nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.coreutils-full  
+			nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.python3.10-pyinstaller-versionfile  
 			nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs.python312  
 			nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.python312Packages.pip  
 			
@@ -111,7 +113,7 @@
 
 		
 		ociImage_pkgs_runtime = nix2containerPkgs.nix2container.buildImage {
-			name = "ttl.sh/python-base:2h";
+			name = "docker.io/holiodin01/python-pip";
 			config = {
 				cmd = [  ];
 
@@ -135,7 +137,7 @@
 		};
 
 		ociImage_pkgs_dev = nix2containerPkgs.nix2container.buildImage {
-			name = "ttl.sh/python-base:2h";
+			name = "docker.io/holiodin01/python-pip";
 			config = {
 				cmd = [  ];
 

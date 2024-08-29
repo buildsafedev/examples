@@ -13,8 +13,10 @@ poetryapp {
   checkGroups  = ["dev"]
 }
 
-oci "pkgs" {
+oci "python-dev" {
   name          = "docker.io/holiodin01/python-base"
+  layers        = ["packages.runtime + packages.dev"]
+  isBase        = true
   cmd           = []
   entrypoint    = []
   envVars       = []
