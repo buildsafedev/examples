@@ -14,6 +14,7 @@ jobs:
         with:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          image_name: holiodin01/gobase
           tag: v0.1.0
 
   build:
@@ -47,10 +48,9 @@ jobs:
         with:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: holiodin01/gobase-dev
-          ociBlocks: go-dev
+          image_name: holiodin01/go-base-dev
+          ociBlock: go-dev
           tag: v0.1.0
-  
   merge-runtime:
     needs: build
     runs-on: ubuntu-latest
@@ -63,6 +63,6 @@ jobs:
         with:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: holiodin01/gobase-runtime
+          image_name: holiodin01/go-base-runtime
           ociBlock: go-runtime
           tag: v0.1.0

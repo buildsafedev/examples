@@ -19,7 +19,7 @@ oci "rust-dev" {
 oci "rust-runtime" {
   name          = "docker.io/holiodin01/rust-base-runtime"
   layers        = ["packages.runtime"]
-  isBase        = false
+  isBase        = true
   cmd           = []
   entrypoint    = []
   envVars       = []
