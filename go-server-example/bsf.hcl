@@ -24,7 +24,7 @@ oci "go-dev" {
 }
 
 oci "go-runtime" {
-  name          = "ttl.sh/bsfgobaseruntime"
+  name          = "docker.io/holiodin01/bsfgobaseruntime"
   layers        = ["packages.runtime"]
   isBase        = true
   cmd           = []

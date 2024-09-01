@@ -6,7 +6,7 @@ packages {
 
 
 oci "rust-dev" {
-  name          = "docker.io/holiodin01/rust-base"
+  name          = "docker.io/holiodin01/rust-base-dev"
   layers        = ["packages.runtime + packages.dev"]
   isBase        = true
   cmd           = []
@@ -17,7 +17,7 @@ oci "rust-dev" {
 }
 
 oci "rust-runtime" {
-  name          = "docker.io/holiodin01/rust-base"
+  name          = "docker.io/holiodin01/rust-base-runtime"
   layers        = ["packages.runtime"]
   isBase        = true
   cmd           = []

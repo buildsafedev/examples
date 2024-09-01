@@ -14,7 +14,6 @@ jobs:
         with:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          ociBlocks: go-dev go-runtime
           tag: v0.1.0
 
   build:
@@ -33,10 +32,10 @@ jobs:
         with:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-
+          ociBlocks: go-dev go-runtime
           directory: 'go-server-example'
 
-  merge:
+  merge-dev:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -48,5 +47,22 @@ jobs:
         with:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: holiodin01/go-base
+          image_name: holiodin01/gobase-dev
+          ociBlocks: go-dev
+          tag: v0.1.0
+  
+  merge-runtime:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Run Merge Action
+        uses: buildsafedev/multiarch-build--action/merge-action@main
+        with:
+          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          image_name: holiodin01/gobase-runtime
+          ociBlock: go-runtime
           tag: v0.1.0
