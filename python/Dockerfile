@@ -1,4 +1,4 @@
-FROM holiodin01/python-dev:v0.1.0 as base
+FROM holiodin01/python-base:v0.1.0 as base
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1

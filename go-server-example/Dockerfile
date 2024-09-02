@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Stage 1: Build the application
-FROM holiodin01/go-dev:v0.1.0 AS build
+FROM holiodin01/go-base-dev:v0.1.0 AS build
 
 WORKDIR /src
 
@@ -13,7 +13,7 @@ RUN mkdir -p /tmp
 RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -o /bin/server .
 
 # Stage 2: Create the final image
-FROM holiodin01/go-runtime:v0.1.0 AS final
+FROM holiodin01/go-base-runtime:v0.1.0 AS final
 
 WORKDIR /app
 
