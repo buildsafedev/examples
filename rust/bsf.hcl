@@ -7,7 +7,7 @@ packages {
 
 oci "rust-dev" {
   name          = "docker.io/holiodin01/rust-base-dev"
-  layers        = ["packages.runtime + packages.dev"]
+  layers        = ["split(packages.runtime)", "split(packages.dev)"]
   isBase        = true
   cmd           = []
   entrypoint    = []
@@ -18,7 +18,7 @@ oci "rust-dev" {
 
 oci "rust-runtime" {
   name          = "docker.io/holiodin01/rust-base-runtime"
-  layers        = ["packages.runtime"]
+  layers        = ["split(packages.runtime)", "split(packages.dev)"]
   isBase        = true
   cmd           = []
   entrypoint    = []
