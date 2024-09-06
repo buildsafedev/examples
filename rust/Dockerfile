@@ -10,7 +10,7 @@ ARG APP_NAME=rust-todo
 #############################
 # Create a stage for building the application.
 
-FROM holiodin01/rust-dev:v0.1.0  AS build
+FROM holiodin01/rust-base-dev:v0.1.0  AS build
 RUN mkdir -p /tmp
 ARG APP_NAME
 WORKDIR /app
@@ -28,7 +28,7 @@ cp ./target/release/$APP_NAME /bin/todo
 # image from the build stage where the necessary files are copied from the build
 # stage.
 
-FROM holiodin01/rust-runtime:v0.1.0 AS final
+FROM holiodin01/rust-base-runtime:v0.1.0 AS final
 
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/todo /bin/
