@@ -135,8 +135,35 @@ ociImage_rust-dev = forEachSupportedSystem ({ pkgs, nix2containerPkgs, system , 
     layers = [
        (nix2containerPkgs.nix2container.buildLayer { 
 			copyToRoot = [
-				inputs.self.runtimeEnvs.${system}.runtime
-inputs.self.devEnvs.${system}.development
+				nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14-pkgs.cacert
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-d919897915f0f91216d2501b617d670deee993a0-pkgs.patchelfUnstable
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-d919897915f0f91216d2501b617d670deee993a0-pkgs.clang_18
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.coreutils-full
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-a731d0cb71c58f56895f71a5b02eda2962a46746-pkgs.libiconv
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.rustc
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.bash
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-a731d0cb71c58f56895f71a5b02eda2962a46746-pkgs.cargo
 			];
 		}) 
       
@@ -170,7 +197,35 @@ ociImage_rust-runtime = forEachSupportedSystem ({ pkgs, nix2containerPkgs, syste
     layers = [
        (nix2containerPkgs.nix2container.buildLayer { 
 			copyToRoot = [
-				inputs.self.runtimeEnvs.${system}.runtime
+				nixpkgs-d919897915f0f91216d2501b617d670deee993a0-pkgs.patchelfUnstable
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14-pkgs.cacert
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.bash
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-a731d0cb71c58f56895f71a5b02eda2962a46746-pkgs.cargo
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-d919897915f0f91216d2501b617d670deee993a0-pkgs.clang_18
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.coreutils-full
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-a731d0cb71c58f56895f71a5b02eda2962a46746-pkgs.libiconv
+			];
+		})  (nix2containerPkgs.nix2container.buildLayer { 
+			copyToRoot = [
+				nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.rustc
 			];
 		}) 
       

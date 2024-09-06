@@ -4,7 +4,7 @@ on:
   push:
 
 jobs:
-  prepare:
+  prepare-go-dev:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -14,11 +14,26 @@ jobs:
         with:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: holiodin01/gobase
+          image_name: holiodin01/go-base-dev
+          ociBlock: go-dev
+          tag: v0.1.0
+
+  prepare-go-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Prepare Action
+        uses: buildsafedev/multiarch-build--action/prepare-action@main
+        with:
+          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          image_name: holiodin01/go-base-runtime
+          ociBlock: go-runtime
           tag: v0.1.0
 
   build:
-    needs: prepare
+    needs : [prepare-go-dev, prepare-go-runtime]
     strategy:
       fail-fast: false
       matrix:
