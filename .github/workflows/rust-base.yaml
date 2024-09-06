@@ -4,7 +4,7 @@ on:
   push:
 
 jobs:
-  prepare:
+  prepare-rust-dev:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -12,13 +12,28 @@ jobs:
       - name: Run Prepare Action
         uses: buildsafedev/multiarch-build--action/prepare-action@main
         with:
-          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: holiodin01/rustbase
+          oci_registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          image_name: holiodin01/rust-base-dev
+          ociBlock: rust-dev
           tag: v0.1.0
 
-  build:
-    needs: prepare
+  prepare-rust-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Prepare Action
+        uses: buildsafedev/multiarch-build--action/prepare-action@main
+        with:
+          oci_registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          image_name: holiodin01/rust-base-runtime
+          ociBlock: rust-runtime
+          tag: v0.1.0
+
+  build: 
+    needs: [prepare-rust-dev, prepare-rust-runtime]
     strategy:
       fail-fast: false
       matrix:
@@ -49,9 +64,8 @@ jobs:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
           image_name: holiodin01/rust-base-dev
-          ociBlocks: rust-dev
+          ociBlock: rust-dev
           tag: v0.1.0
-  
   merge-runtime:
     needs: build
     runs-on: ubuntu-latest
@@ -65,5 +79,5 @@ jobs:
           oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
           image_name: holiodin01/rust-base-runtime
-          ociBlocks: rust-runtime
+          ociBlock: rust-runtime
           tag: v0.1.0
