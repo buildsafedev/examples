@@ -1,6 +1,6 @@
 
 packages {
-  development = ["go@1.22.3", "gotools@0.18.0", "delve@1.22.1", "coreutils-full@~9.5", "tzdata@2024a", "bash@~5.2.15"]
+  development = ["go@1.22.3", "gotools@0.18.0", "delve@1.22.1", "coreutils-full@~9.5", "tzdata@2024a", "bash@~5.2.15", "grype@~0.80.2"]
   runtime     = ["cacert@3.95"]
 }
 
@@ -22,7 +22,6 @@ oci "go-dev" {
   exposedPorts  = []
   importConfigs = []
 }
-
 oci "go-runtime" {
   name          = "docker.io/holiodin01/go-base-runtime"
   layers        = ["packages.runtime"]
