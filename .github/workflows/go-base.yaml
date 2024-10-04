@@ -99,3 +99,6 @@ jobs:
           platform: linux/amd64
           base_image: holiodin01/go-base-dev:v0.1.0
           runtime_image: holiodin01/go-base-runtime:v0.1.0
+          cosign_password : ${{ secrets.COSIGN_PASSWORD }}
+          cosign_private_key : ${{ secrets.COSIGN_PRIVATE_KEY }}
+          cosign_public_key : ${{ secrets.COSIGN_PUBLIC_KEY }}
