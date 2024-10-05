@@ -81,3 +81,24 @@ jobs:
           image_name: holiodin01/rust-base-runtime
           ociBlock: rust-runtime
           tag: v0.1.0
+  
+  hermetic_builds:
+    needs: [merge-dev, merge-runtime]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Hermetic Build Action
+        uses: buildsafedev/multiarch-build--action/hermetic-build@hermetic_builds
+        with:
+          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          directory: 'rust'
+          image_name: holiodin01/rust-final
+          tag: v0.1.0
+          platform: linux/amd64
+          base_image: holiodin01/rust-base-dev:v0.1.0
+          runtime_image: holiodin01/rust-base-runtime:v0.1.0
+          cosign_password : ${{ secrets.COSIGN_PASSWORD }}
+          cosign_private_key : ${{ secrets.COSIGN_PRIVATE_KEY }}
+          cosign_public_key : ${{ secrets.COSIGN_PUBLIC_KEY }}

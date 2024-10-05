@@ -4,86 +4,86 @@ on:
   push:
 
 jobs:
-  # prepare-go-dev:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #     - name: Run Prepare Action
-  #       uses: buildsafedev/multiarch-build--action/prepare-action@main
-  #       with:
-  #         oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-  #         oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-  #         image_name: holiodin01/go-base-dev
-  #         ociBlock: go-dev
-  #         tag: v0.1.0
+  prepare-go-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Prepare Action
+        uses: buildsafedev/multiarch-build--action/prepare-action@main
+        with:
+          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          image_name: holiodin01/go-base-dev
+          ociBlock: go-dev
+          tag: v0.1.0
 
-  # prepare-go-runtime:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #     - name: Run Prepare Action
-  #       uses: buildsafedev/multiarch-build--action/prepare-action@main
-  #       with:
-  #         oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-  #         oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-  #         image_name: holiodin01/go-base-runtime
-  #         ociBlock: go-runtime
-  #         tag: v0.1.0
+  prepare-go-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Prepare Action
+        uses: buildsafedev/multiarch-build--action/prepare-action@main
+        with:
+          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          image_name: holiodin01/go-base-runtime
+          ociBlock: go-runtime
+          tag: v0.1.0
 
-  # build:
-  #   needs : [prepare-go-dev, prepare-go-runtime]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       platform: [ubuntu-latest, linux-arm64]  
-  #   runs-on: ${{ matrix.platform }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+  build:
+    needs : [prepare-go-dev, prepare-go-runtime]
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, linux-arm64]  
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       
-  #     - name: Run Build Action
-  #       uses: buildsafedev/multiarch-build--action/build-action@main
-  #       with:
-  #         oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-  #         oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-  #         ociBlocks: go-dev go-runtime
-  #         directory: 'go-server-example'
+      - name: Run Build Action
+        uses: buildsafedev/multiarch-build--action/build-action@main
+        with:
+          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          ociBlocks: go-dev go-runtime
+          directory: 'go-server-example'
 
-  # merge-dev:
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+  merge-dev:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       
-  #     - name: Run Merge Action
-  #       uses: buildsafedev/multiarch-build--action/merge-action@main
-  #       with:
-  #         oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-  #         oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-  #         image_name: holiodin01/go-base-dev
-  #         ociBlock: go-dev
-  #         tag: v0.1.0
-  # merge-runtime:
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+      - name: Run Merge Action
+        uses: buildsafedev/multiarch-build--action/merge-action@main
+        with:
+          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          image_name: holiodin01/go-base-dev
+          ociBlock: go-dev
+          tag: v0.1.0
+  merge-runtime:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       
-  #     - name: Run Merge Action
-  #       uses: buildsafedev/multiarch-build--action/merge-action@main
-  #       with:
-  #         oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-  #         oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-  #         image_name: holiodin01/go-base-runtime
-  #         ociBlock: go-runtime
-  #         tag: v0.1.0
+      - name: Run Merge Action
+        uses: buildsafedev/multiarch-build--action/merge-action@main
+        with:
+          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
+          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          image_name: holiodin01/go-base-runtime
+          ociBlock: go-runtime
+          tag: v0.1.0
   
   hermetic_builds:
-    # needs: [merge-dev, merge-runtime]
+    needs: [merge-dev, merge-runtime]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
