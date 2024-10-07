@@ -10,7 +10,7 @@ ARG APP_NAME=rust-todo
 #############################
 # Create a stage for building the application.
 
-FROM holiodin01/rust-base-dev:v0.1.0  AS base
+FROM holiodin01/rust-base-dev:v0.1.0 AS build
 RUN mkdir -p /tmp
 ARG APP_NAME
 WORKDIR /app

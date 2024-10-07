@@ -72,6 +72,7 @@
 			nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.bash  
 			nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.coreutils-full  
 			nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191-pkgs.cosign  
+			nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191-pkgs.grype  
 			nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs.poetry  
 			nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs.python312  
 			
@@ -104,6 +105,7 @@
 			nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.bash  
 			nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.coreutils-full  
 			nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191-pkgs.cosign  
+			nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191-pkgs.grype  
 			nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs.poetry  
 			nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs.python312  
 			

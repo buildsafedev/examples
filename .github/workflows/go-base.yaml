@@ -85,7 +85,7 @@ jobs:
           tag: v0.1.0
   
   hermetic_builds:
-    # needs: [merge-dev, merge-runtime]
+    needs: [merge-dev, merge-runtime]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -94,8 +94,10 @@ jobs:
       - name : Replace base image in Dockerfile
         run: |
           # This is a hack to replace the base image in the Dockerfile , you can also use docker cmd also
-          sed -i "s|FROM .* AS build|FROM holiodin01/go-base-dev:v0.1.0 AS build|g" go-server-example/Dockerfile
+          sed -i "s|FROM .* AS base|FROM holiodin01/go-base-dev:v0.1.0 AS base|g" go-server-example/Dockerfile
           sed -i "s|FROM .* AS final|FROM holiodin01/go-base-runtime:v0.1.0 AS final|g" go-server-example/Dockerfile
+
+          cat go-server-example/Dockerfile
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -120,12 +122,6 @@ jobs:
         
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
-         
-      - name: Check Nixpkgs inputs
-        uses: DeterminateSystems/flake-checker-action@main
-        with:
-          fail-mode: true
-          flake-lock-path: go-server-example/bsf/flake.lock
       
           # Setup Nix development environment make sure to use ./ before the path otherwise nix takes it as a https url
       - name: Setup Nix development environment

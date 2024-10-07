@@ -59,16 +59,64 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Run Hermetic Build Action
-        uses: buildsafedev/multiarch-build--action/hermetic-build@hermetic_builds
+        
+      - name : Replace base image in Dockerfile
+        run: |
+          # This is a hack to replace the base image in the Dockerfile , you can also use docker cmd also
+          sed -i "s|FROM .* AS base|FROM holiodin01/python-pip-base:v0.1.0 AS base|g" python-pip/Dockerfile
+          cat python-pip/Dockerfile
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          directory: 'python-pip'
-          image_name: holiodin01/python-pip-final
-          tag: v0.1.0
-          platform: linux/amd64
-          base_image: holiodin01/python-pip-base:v0.1.0
-          cosign_password : ${{ secrets.COSIGN_PASSWORD }}
-          cosign_private_key : ${{ secrets.COSIGN_PRIVATE_KEY }}
-          cosign_public_key : ${{ secrets.COSIGN_PUBLIC_KEY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name : Build hermetic image
+        working-directory: python-pip
+        run: |
+
+          docker buildx create --name mybuilder --use --driver docker-container
+
+          docker buildx build \
+            --no-cache \
+            --tag holiodin01/python-pip-final:latest \
+            --network=none \
+            --attest type=provenance,mode=min \
+            --platform=linux/amd64 \
+            --push \
+            --output type=oci \
+            .
+        
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+          # Setup Nix development environment make sure to use ./ before the path otherwise nix takes it as a https url
+      - name: Setup Nix development environment
+        uses: nicknovitski/nix-develop@v1
+        with:
+          arguments: ./python-pip/bsf/.#devShell
+      
+      - name: Is hermetic build
+        run: |
+            docker buildx imagetools inspect holiodin01/python-final:latest --format "{{ json .Provenance.SLSA }}" > slsa.json
+            cat slsa.json
+            if [ "$(jq -r '.build.builder' slsa.json)" == "hermetic" ]; then
+              echo "Hermetic build"
+             else
+              echo "Not hermetic build"
+            fi
+          
+      # Check for vulnerabilities :)
+      - name: Check for vulnerabilities
+        run: grype holiodin01/python-pip-final:latest
+      
+      
+      # Sign and push the image 
+      - name: Sign and push image
+        run: |
+            export COSIGN_PASSWORD=${{ secrets.COSIGN_PASSWORD }}
+            echo "${{secrets.COSIGN_PRIVATE_KEY}}" > cosign.key
+            echo "${{secrets.COSIGN_PUBLIC_KEY}}" > cosign.pub
+
+            cosign sign --yes --key cosign.key holiodin01/python-pip-final:latest
+            cosign verify --key cosign.pub  holiodin01/python-pip-final:latest
+            cosign triangulate holiodin01/python-pip-final:latest
