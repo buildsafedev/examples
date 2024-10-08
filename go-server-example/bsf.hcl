@@ -1,6 +1,6 @@
 
 packages {
-  development = ["go@1.22.3", "gotools@0.18.0", "delve@1.22.1", "coreutils-full@~9.5", "tzdata@2024a", "bash@~5.2.15", "grype@~0.80.2", "skopeo@~1.16.1", "cosign@~2.4.0"]
+  development = ["go@1.22.3", "gotools@0.18.0", "delve@1.22.1", "coreutils-full@~9.5", "tzdata@2024a", "bash@~5.2.15", "grype@~0.80.2", "skopeo@~1.16.1"]
   runtime     = ["cacert@3.95"]
 }
 
