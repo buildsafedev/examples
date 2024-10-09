@@ -1,4 +1,5 @@
-FROM holiodin01/python-pip-base:v0.1.0 AS base
+ARG BASE_IMAGE=holiodin01/python-pip-base:v0.1.0
+FROM ${BASE_IMAGE} AS build
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1

@@ -85,21 +85,13 @@ jobs:
           tag: v0.1.0
   
   hermetic_builds:
-    needs: [merge-dev, merge-runtime]
+    # needs: [merge-dev, merge-runtime]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
-      - name : Replace base image in Dockerfile
-        run: |
-          # This is a hack to replace the base image in the Dockerfile , you can also use docker cmd also
-          sed -i "s|FROM .* AS base|FROM holiodin01/go-base-dev:v0.1.0 AS base|g" go-server-example/Dockerfile
-          sed -i "s|FROM .* AS final|FROM holiodin01/go-base-runtime:v0.1.0 AS final|g" go-server-example/Dockerfile
-
-          cat go-server-example/Dockerfile
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -113,6 +105,8 @@ jobs:
           docker buildx create --name mybuilder --use --driver docker-container
 
           docker buildx build \
+            --build-arg BASE_IMAGE=holiodin01/go-base-dev:v0.1.0 \
+            --build-arg RUNTIME_IMAGE=holiodin01/go-base-runtime:v0.1.0 \
             --no-cache \
             --tag holiodin01/go-final:latest \
             --network=none \
@@ -160,6 +154,7 @@ jobs:
               fi
 
   sign-the-image:
+    needs: hermetic_builds
     runs-on: ubuntu-latest
     permissions:
       id-token: write
