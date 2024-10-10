@@ -21,4 +21,46 @@ Now is the time to run `bsf init` which will generate the `bsf.hcl` and `bsf.loc
 `git add . ` <- Required by nix sandboxing.
 
 ## Develop the porject
+This will get you in the development shell of your application
 `bsf develop`
+
+## Interact with the project
+You can checkout the ruby version
+`ruby -v`
+Try to install rails
+`gem install rails`
+
+## Create a base image with Ruby dependencies and using it the Dockerfile
+```Dockerfile
+# Ruby Alpine image (after using bsf dockerfile digest)
+FROM ruby:3.1-alpine AS build
+
+# Install all required dependencies for Ruby gems
+RUN apk add --no-cache build-base libxml2-dev libxslt-dev tzdata
+
+WORKDIR /src
+
+# Copy the Gemfile and Gemfile.lock into the container
+COPY Gemfile Gemfile.lock /src/
+
+# Install the required gems
+RUN bundle install
+
+# Copy the rest of the application files to the container
+COPY . /src
+
+# Expose the application port
+EXPOSE 9898
+
+# Command to run the Ruby application
+CMD ["ruby", "main.rb"]
+```
+
+Lets build this image
+`docker build -t ttl.sh/ruby-server:dev`
+
+Now Run the image
+`docker run -d -p 9898:9898 ttl.sh/ruby-server:dev`
+
+## Checkout your application
+`curl localhost:9898/ping` here the response should be `Pong!`

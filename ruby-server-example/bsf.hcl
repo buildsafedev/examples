@@ -1,6 +1,6 @@
 
 packages {
-  development = ["coreutils-full@9.5", "bash@5.2.15"]
+  development = ["coreutils-full@9.5", "bash@5.2.15", "ruby@~3.3.4"]
   runtime     = ["cacert@3.95"]
 }
 
