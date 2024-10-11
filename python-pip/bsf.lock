@@ -309,13 +309,13 @@
     {
       "package": {
         "name": "python3",
-        "revision": "d7570b04936e9b0f5268e0d834dee40368ad3308",
-        "version": "3.12.2",
-        "description": "A high-level dynamically-typed programming language",
+        "revision": "2af19cfb6aa40768c4bbefd801a136270e099191",
+        "version": "3.12.5",
+        "description": "High-level dynamically-typed programming language",
         "homepage": "https://www.python.org",
         "free": true,
         "spdx_id": "Python-2.0",
-        "epoch_seconds": 1709830921,
+        "epoch_seconds": 1727301923,
         "platforms": [
           "aarch64-linux",
           "armv5tel-linux",
@@ -345,9 +345,11 @@
           "i686-cygwin",
           "x86_64-cygwin",
           "x86_64-windows",
-          "i686-windows"
+          "i686-windows",
+          "i686-freebsd",
+          "x86_64-freebsd"
         ],
-        "attr_name": "python312"
+        "attr_name": "python312Full"
       },
       "runtime": false
     },

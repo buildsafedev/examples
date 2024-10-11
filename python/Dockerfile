@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=holiodin01/python-base:v0.1.0
+ARG BASE_IMAGE=holiodin01/python-base@sha256:621e91c99e2e63f7449db891c63a4c81f6982a66c43aaac239cedae55766fad0
 FROM ${BASE_IMAGE} as build
 
 # Prevents Python from writing pyc files.

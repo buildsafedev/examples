@@ -1,4 +1,6 @@
 name: go-base
+env :
+  image_tag: v1
 
 on:
   push:
@@ -16,7 +18,7 @@ jobs:
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
           image_name: holiodin01/go-base-dev
           ociBlock: go-dev
-          tag: v0.1.0
+          tag: ${{ env.image_tag }}
 
   prepare-go-runtime:
     runs-on: ubuntu-latest
@@ -30,7 +32,7 @@ jobs:
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
           image_name: holiodin01/go-base-runtime
           ociBlock: go-runtime
-          tag: v0.1.0
+          tag: ${{ env.image_tag }}
 
   # Build the oci images for dev and runtime
   build:
@@ -67,7 +69,7 @@ jobs:
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
           image_name: holiodin01/go-base-dev
           ociBlock: go-dev
-          tag: v0.1.0
+          tag: ${{ env.image_tag }}
   merge-runtime:
     needs: build
     runs-on: ubuntu-latest
@@ -82,10 +84,10 @@ jobs:
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
           image_name: holiodin01/go-base-runtime
           ociBlock: go-runtime
-          tag: v0.1.0
+          tag: ${{ env.image_tag }}
   
   hermetic_builds:
-    # needs: [merge-dev, merge-runtime]
+    needs: [merge-dev, merge-runtime]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -102,13 +104,18 @@ jobs:
         working-directory: go-server-example
         run: |
 
+          # Use command substitution to assign the digests
+          base_img_digest=$(docker manifest inspect holiodin01/go-base-dev:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+          runtime_img_digest=$(docker manifest inspect holiodin01/go-base-runtime:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+
+
           docker buildx create --name mybuilder --use --driver docker-container
 
           docker buildx build \
-            --build-arg BASE_IMAGE=holiodin01/go-base-dev:v0.1.0 \
-            --build-arg RUNTIME_IMAGE=holiodin01/go-base-runtime:v0.1.0 \
+            --build-arg BASE_IMAGE=holiodin01/go-base-dev@${base_img_digest} \
+            --build-arg RUNTIME_IMAGE=holiodin01/go-base-runtime@${runtime_img_digest} \
             --no-cache \
-            --tag holiodin01/go-final:latest \
+            --tag holiodin01/go-final:${{ env.image_tag }} \
             --network=none \
             --attest type=provenance,mode=min \
             --platform=linux/amd64 \
@@ -127,7 +134,7 @@ jobs:
       
       - name: Is hermetic build
         run: |
-            docker buildx imagetools inspect holiodin01/go-final:latest --format "{{ json .Provenance.SLSA }}" > slsa.json
+            docker buildx imagetools inspect holiodin01/go-final:${{ env.image_tag }} --format "{{ json .Provenance.SLSA }}" > slsa.json
             cat slsa.json
             if grep -q "https://mobyproject.org/buildkit@v1#hermetic\": true" slsa.json; then
               echo "Hermetic build"
@@ -137,21 +144,8 @@ jobs:
           
       # Check for vulnerabilities :)
       - name: Check for vulnerabilities
-        run: |
-          grype holiodin01/go-final:latest
+        run: grype holiodin01/go-final:${{ env.image_tag }} --only-fixed --fail-on high
 
-          # Check for vulnerabilities :)
-          - name: Check for vulnerabilities
-            run: |
-              grype holiodin01/go-final:latest
-
-              output=$(grype holiodin01/go-final:latest)
-              if echo "$output" | grep -E 'Critical|High|Medium' > /dev/null; then
-                echo "Image Coinatins vulnerabilities"
-              exit 1
-              else
-                echo "No high vulnerabilities found"
-              fi
 
   sign-the-image:
     needs: hermetic_builds
@@ -175,10 +169,10 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: |
-          cosign sign --yes holiodin01/go-final:latest
+          cosign sign --yes holiodin01/go-final:${{ env.image_tag }}
           cosign verify \
           --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
           --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-          holiodin01/go-final:latest
+          holiodin01/go-final:${{ env.image_tag }}
 
-          cosign triangulate holiodin01/go-final:latest
+          cosign triangulate holiodin01/go-final:${{ env.image_tag }}

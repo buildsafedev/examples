@@ -70,7 +70,7 @@
 			nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.bash  
 			nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.coreutils-full  
 			nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs.delve  
-			nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.go  
+			nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191-pkgs.go_1_23  
 			nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs.gotools  
 			nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191-pkgs.grype  
 			nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191-pkgs.skopeo  
@@ -105,7 +105,7 @@
 			nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7-pkgs.bash  
 			nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.coreutils-full  
 			nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs.delve  
-			nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4-pkgs.go  
+			nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191-pkgs.go_1_23  
 			nixpkgs-d7570b04936e9b0f5268e0d834dee40368ad3308-pkgs.gotools  
 			nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191-pkgs.grype  
 			nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191-pkgs.skopeo  

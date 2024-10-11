@@ -260,13 +260,13 @@
     {
       "package": {
         "name": "go",
-        "revision": "7445ccd775d8b892fc56448d17345443a05f7fb4",
-        "version": "1.22.3",
-        "description": "The Go Programming language",
+        "revision": "2af19cfb6aa40768c4bbefd801a136270e099191",
+        "version": "1.23.1",
+        "description": "Go Programming language",
         "homepage": "https://go.dev/",
         "free": true,
         "spdx_id": "BSD-3-Clause",
-        "epoch_seconds": 1716993062,
+        "epoch_seconds": 1727301923,
         "platforms": [
           "x86_64-darwin",
           "i686-darwin",
@@ -294,9 +294,11 @@
           "s390x-linux",
           "x86_64-linux",
           "wasm64-wasi",
-          "wasm32-wasi"
+          "wasm32-wasi",
+          "i686-freebsd",
+          "x86_64-freebsd"
         ],
-        "attr_name": "go"
+        "attr_name": "go_1_23"
       },
       "runtime": false
     },

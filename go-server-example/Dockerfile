@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=holiodin01/go-base-dev:v0.1.0
-ARG RUNTIME_IMAGE=holiodin01/go-base-runtime:v0.1.0
+ARG BASE_IMAGE=holiodin01/go-base-dev@sha256:1db4455e49d70f1fe1b5564ab57227ea7b2b499ad7d23cf7a9fc0d222502a010
+ARG RUNTIME_IMAGE=holiodin01/go-base-runtime@sha256:ac6c10434184f1f1bdf6a1d22427da18ccfd998e8363962aa101a86b0387de5d
 
 # Stage 1: Build the application
 FROM ${BASE_IMAGE} AS build
