@@ -33,7 +33,7 @@ Try to install rails
 ## Create a base image with Ruby dependencies and using it the Dockerfile
 ```Dockerfile
 # Ruby Alpine image (after using bsf dockerfile digest)
-FROM ruby:3.1-alpine AS build
+FROM ttl.sh/ruby-server AS build
 
 # Install all required dependencies for Ruby gems
 RUN apk add --no-cache build-base libxml2-dev libxslt-dev tzdata
