@@ -86,6 +86,51 @@ jobs:
           ociBlock: go-runtime
           tag: ${{ env.image_tag }}
   
+  sign-the-image:
+    needs: [merge-dev, merge-runtime]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+      - name: Sign and push image
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+
+          base_img_digest=$(docker manifest inspect holiodin01/go-base-dev:${image_tag} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+          runtime_img_digest=$(docker manifest inspect holiodin01/go-base-runtime:${image_tag} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+
+          cosign sign --yes holiodin01/go-base-dev@${base_img_digest}
+          cosign verify \
+          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          holiodin01/go-base-dev@${base_img_digest}
+
+          cosign triangulate holiodin01/go-base-dev@${base_img_digest}
+
+          #  Sign and verify the runtime image
+          cosign sign --yes holiodin01/go-base-runtime@${runtime_img_digest}
+          cosign verify \
+          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          holiodin01/go-base-runtime@${runtime_img_digest}
+
+          cosign triangulate holiodin01/go-base-runtime@${runtime_img_digest}
+
+
+
   hermetic_builds:
     needs: [merge-dev, merge-runtime]
     runs-on: ubuntu-latest
@@ -147,7 +192,7 @@ jobs:
         run: grype holiodin01/go-final:${{ env.image_tag }} --only-fixed --fail-on high
 
 
-  sign-the-image:
+  sign-final-image:
     needs: hermetic_builds
     runs-on: ubuntu-latest
     permissions:
@@ -169,10 +214,13 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: |
-          cosign sign --yes holiodin01/go-final:${{ env.image_tag }}
+
+          final_img_digest=$(docker manifest inspect holiodin01/go-final:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+
+          cosign sign --yes holiodin01/go-final@${final_img_digest}
           cosign verify \
           --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
           --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-          holiodin01/go-final:${{ env.image_tag }}
+          holiodin01/go-final@${final_img_digest}
 
-          cosign triangulate holiodin01/go-final:${{ env.image_tag }}
+          cosign triangulate holiodin01/go-final@${final_img_digest}
