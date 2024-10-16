@@ -13,8 +13,8 @@ gomodule {
 }
 
 oci "go-dev" {
-  name          = "docker.io/holiodin01/go-base-dev"
-  layers        = ["packages.runtime + packages.dev"]
+  name          = "ghcr.io/buildsafedev/go-base-dev"
+  layers        = ["packages.dev"]
   isBase        = true
   cmd           = []
   entrypoint    = []
@@ -23,7 +23,7 @@ oci "go-dev" {
   importConfigs = []
 }
 oci "go-runtime" {
-  name          = "docker.io/holiodin01/go-base-runtime"
+  name          = "ghcr.io/buildsafedev/go-base-runtime"
   layers        = ["packages.runtime"]
   isBase        = true
   cmd           = []

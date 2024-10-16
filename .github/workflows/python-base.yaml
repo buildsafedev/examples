@@ -87,6 +87,17 @@ jobs:
           holiodin01/python-base@${base_img_digest}
           
           cosign triangulate holiodin01/python-base@${base_img_digest}
+
+          base_img_digest_arm=$(docker manifest inspect holiodin01/python-base:${image_tag} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
+          cosign sign --yes holiodin01/python-base@${base_img_digest_arm}
+
+          cosign verify \
+          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/python-base.yaml@refs/heads/multiarch-builds" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          holiodin01/python-base@${base_img_digest_arm}
+
+          cosign triangulate holiodin01/python-base@${base_img_digest_arm}
+
      
 
   hermetic_builds:
@@ -139,6 +150,7 @@ jobs:
               echo "Hermetic build"
             else
               echo "Not a hermetic build"
+              exit 1
             fi
           
     
@@ -146,7 +158,7 @@ jobs:
           # Check for vulnerabilities :)
       - name: Check for vulnerabilities
         run: |
-          grype holiodin01/python-final:${{ env.image_tag }} --only-fixed --fail-on high
+          grype holiodin01/python-final:${{ env.image_tag }} --only-fixed --fail-on low
 
   sign-final-image:
     needs: hermetic_builds

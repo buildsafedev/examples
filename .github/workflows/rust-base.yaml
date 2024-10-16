@@ -125,6 +125,25 @@ jobs:
 
           cosign triangulate holiodin01/rust-base-runtime@${runtime_img_digest}
 
+          base_img_digest_arm=$(docker manifest inspect holiodin01/rust-base-dev:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
+          runtime_img_digest_arm=$(docker manifest inspect holiodin01/rust-base-dev:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
+
+          cosign sign --yes holiodin01/rust-base-dev@${base_img_digest_arm}
+          cosign verify \
+          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/rust-base.yaml@refs/heads/multiarch-builds" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          holiodin01/rust-base-dev@${base_img_digest_arm}
+
+          cosign triangulate holiodin01/rust-base-dev@${base_img_digest_arm}
+
+          cosign sign --yes holiodin01/rust-base-runtime@${runtime_img_digest_arm}
+          cosign verify \
+          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/rust-base.yaml@refs/heads/multiarch-builds" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          holiodin01/rust-base-dev@${runtime_img_digest_arm}
+
+          cosign triangulate holiodin01/rust-base-dev@${runtime_img_digest_arm}
+
   
   hermetic_builds:
     needs: [merge-dev, merge-runtime]
@@ -179,11 +198,12 @@ jobs:
               echo "Hermetic build"
             else
               echo "Not a hermetic build"
+              exit 1
             fi
           
       # Check for vulnerabilities :)
       - name: Check for vulnerabilities
-        run: grype holiodin01/rust-final:${{ env.image_tag }} --only-fixed --fail-on high
+        run: grype holiodin01/rust-final:${{ env.image_tag }} --only-fixed --fail-on low
 
 
   sign-final-image:
