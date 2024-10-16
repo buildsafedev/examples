@@ -120,8 +120,8 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: |
-          base_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}:${image_tag} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
-          runtime_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}:${image_tag} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+          base_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+          runtime_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
 
           cosign sign --yes ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest}
           cosign verify \
@@ -137,8 +137,8 @@ jobs:
           ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}@${runtime_img_digest}
           cosign triangulate ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}@${runtime_img_digest}
 
-          base_img_digest_arm64=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}:${image_tag} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
-          runtime_img_digest_arm64=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}:${image_tag} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
+          base_img_digest_arm64=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
+          runtime_img_digest_arm64=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
           cosign sign --yes ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest_arm64}
           cosign verify \
           --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
