@@ -1,5 +1,6 @@
+
 packages {
-  development = ["coreutils-full@9.5", "python3@3.12.2", "bash@5.2.15", "python3.12-pip@~24.0"]
+  development = ["coreutils-full@9.5", "bash@5.2.15", "python3.12-pip@~24.0", "cosign@~2.4.0", "grype@~0.80.2", "python3@~3.12.5"]
   runtime     = ["cacert@3.95"]
 }
 

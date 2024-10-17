@@ -1,0 +1,9 @@
+schema = 3
+
+[mod]
+  [mod."github.com/sirupsen/logrus"]
+    version = "v1.9.3"
+    hash = "sha256-EnxsWdEUPYid+aZ9H4/iMTs1XMvCLbXZRDyvj89Ebms="
+  [mod."golang.org/x/sys"]
+    version = "v0.0.0-20220715151400-c0bba94af5f8"
+    hash = "sha256-8LGu1Rwel+ZWaOXHjOxoQDthPPDpJxWD9SoXdCJQq04="
