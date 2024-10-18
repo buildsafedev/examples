@@ -1,7 +1,4 @@
-# syntax=docker/dockerfile:1
-
-# Stage 1: Build the application
-FROM golang:1.22.1 AS build
+FROM ttl.sh/go-base:dev AS build
 
 WORKDIR /src
 
@@ -13,7 +10,7 @@ RUN mkdir -p /tmp
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/server .
 
 # Stage 2: Create the final image
-FROM alpine:latest AS final
+FROM ttl.sh/go-base:runtime AS final
 
 WORKDIR /app
 
