@@ -1,6 +1,6 @@
 
 packages {
-  development = ["go@1.22.3", "gotools@0.18.0", "delve@1.22.1", "coreutils-full@~9.5", "tzdata@2024a", "bash@~5.2.15"]
+  development = ["bash@~5.2.15", "coreutils-full@~9.5", "delve@1.22.1", "gotools@0.18.0", "grype@~0.80.2", "skopeo@~1.16.1", "tzdata@2024a", "go@~1.23.1"]
   runtime     = ["cacert@3.95"]
 }
 
@@ -13,8 +13,8 @@ gomodule {
 }
 
 oci "go-dev" {
-  name          = "docker.io/holiodin01/go-base-dev"
-  layers        = ["packages.runtime + packages.dev"]
+  name          = "ghcr.io/buildsafedev/go-base-dev"
+  layers        = ["packages.dev"]
   isBase        = true
   cmd           = []
   entrypoint    = []
@@ -22,9 +22,8 @@ oci "go-dev" {
   exposedPorts  = []
   importConfigs = []
 }
-
 oci "go-runtime" {
-  name          = "docker.io/holiodin01/go-base-runtime"
+  name          = "ghcr.io/buildsafedev/go-base-runtime"
   layers        = ["packages.runtime"]
   isBase        = true
   cmd           = []

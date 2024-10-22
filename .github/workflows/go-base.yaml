@@ -1,4 +1,14 @@
 name: go-base
+env :
+  image_tag: v1
+  REGISTRY: ghcr.io
+  owner : buildsafedev
+  runtime_image: go-base-runtime
+  dev_image: go-base-dev
+  final_image: go-final
+  final_arm64_image: go-final-arm64
+  final_amd64_image: go-final-amd64
+
 
 on:
   push:
@@ -12,11 +22,11 @@ jobs:
       - name: Run Prepare Action
         uses: buildsafedev/multiarch-build--action/prepare-action@main
         with:
-          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: holiodin01/go-base-dev
+          oci_registry_username: ${{ env.owner}}
+          oci_registry_password: ${{ secrets.GITHUB_TOKEN }}
+          image_name: ${{ env.owner }}/${{ env.dev_image }}
           ociBlock: go-dev
-          tag: v0.1.0
+          tag: ${{ env.image_tag }}
 
   prepare-go-runtime:
     runs-on: ubuntu-latest
@@ -26,12 +36,13 @@ jobs:
       - name: Run Prepare Action
         uses: buildsafedev/multiarch-build--action/prepare-action@main
         with:
-          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: holiodin01/go-base-runtime
+          oci_registry_username: ${{ env.owner }}
+          oci_registry_password: ${{ secrets.GITHUB_TOKEN }}
+          image_name: ${{ env.owner }}/${{ env.runtime_image }}
           ociBlock: go-runtime
-          tag: v0.1.0
+          tag: ${{ env.image_tag }}
 
+  # Build the oci images for dev and runtime
   build:
     needs : [prepare-go-dev, prepare-go-runtime]
     strategy:
@@ -46,11 +57,13 @@ jobs:
       - name: Run Build Action
         uses: buildsafedev/multiarch-build--action/build-action@main
         with:
-          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          oci_registry_username: ${{ env.owner }}
+          oci_registry_password: ${{ secrets.GITHUB_TOKEN }}
           ociBlocks: go-dev go-runtime
           directory: 'go-server-example'
+          registry: ghcr.io
 
+  # This pirticular job is used to merge the development image of arm64 and amd64
   merge-dev:
     needs: build
     runs-on: ubuntu-latest
@@ -61,11 +74,12 @@ jobs:
       - name: Run Merge Action
         uses: buildsafedev/multiarch-build--action/merge-action@main
         with:
-          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: holiodin01/go-base-dev
+          oci_registry_username: ${{ env.owner }}
+          oci_registry_password: ${{ secrets.GITHUB_TOKEN }}
+          image_name: ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}
           ociBlock: go-dev
-          tag: v0.1.0
+          tag: ${{ env.image_tag }}
+          registry: ghcr.io
   merge-runtime:
     needs: build
     runs-on: ubuntu-latest
@@ -76,8 +90,276 @@ jobs:
       - name: Run Merge Action
         uses: buildsafedev/multiarch-build--action/merge-action@main
         with:
-          oci_registry_username: ${{ secrets.DOCKER_USERNAME }}
-          oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: holiodin01/go-base-runtime
+          oci_registry_username: ${{ env.owner }}
+          oci_registry_password: ${{ secrets.GITHUB_TOKEN }}
+          image_name: ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}
           ociBlock: go-runtime
-          tag: v0.1.0
+          tag: ${{ env.image_tag }}
+          registry: ghcr.io
+  
+  sign-base-image:
+    needs: [merge-dev, merge-runtime]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{env.owner}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+
+      - name: Sign and push image
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          base_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+          runtime_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest}
+          cosign verify \
+          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest}
+          cosign triangulate ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest}
+          #  Sign and verify the runtime image
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}@${runtime_img_digest}
+          cosign verify \
+          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}@${runtime_img_digest}
+          cosign triangulate ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}@${runtime_img_digest}
+
+          base_img_digest_arm64=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
+          runtime_img_digest_arm64=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest_arm64}
+          cosign verify \
+          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest_arm64}
+          cosign triangulate ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest_arm64}
+          cosign sign --yes ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}@${runtime_img_digest_arm64}
+          cosign verify \
+          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}@${runtime_img_digest_arm64}
+          cosign triangulate ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}@${runtime_img_digest_arm64}
+
+  hermetic_builds:
+    runs-on: ubuntu-latest
+    needs: [sign-base-image]
+    permissions:
+      id-token: write
+      packages: write
+      contents: read
+      attestations: write
+    outputs:
+      amd64_digest: ${{ steps.build-amd64.outputs.digest }}
+      arm64_digest: ${{ steps.build-arm64.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{env.owner}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Build hermetic image amd64
+        id: build-amd64
+        working-directory: go-server-example
+        run: |
+          base_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+          runtime_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+          docker buildx create --name mybuilder --use --driver docker-container
+          docker buildx build \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest} \
+            --build-arg RUNTIME_IMAGE=${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}@${runtime_img_digest} \
+            --no-cache \
+            --tag ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.final_amd64_image }}:${{ env.image_tag }} \
+            --network=none \
+            --attest type=provenance,mode=min \
+            --platform=linux/amd64 \
+            --push \
+            --output type=oci \
+            https://github.com/buildsafedev/examples.git\#multiarch-builds:go-server-example
+          # Get the digest of the built image
+          amd64_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.final_image }}${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+          echo "digest=$amd64_digest" >> $GITHUB_OUTPUT
+          
+      - name: Build hermetic image arm64
+        id: build-arm64
+        working-directory: go-server-example
+        run: |
+          base_img_digest_arm64=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
+          runtime_img_digest_arm64=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
+          docker buildx build \
+            --build-arg BASE_IMAGE=${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest_arm64} \
+            --build-arg RUNTIME_IMAGE=${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}@${runtime_img_digest_arm64} \
+            --no-cache \
+            --tag ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.final_arm64_image }}:${{ env.image_tag }} \
+            --network=none \
+            --attest type=provenance,mode=min \
+            --platform=linux/arm64 \
+            --push \
+            --output type=oci \
+            https://github.com/buildsafedev/examples.git\#multiarch-builds:go-server-example
+          # Get the digest of the built image
+          arm64_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{github.actor}}/${{ env.final_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
+          echo "digest=$arm64_digest" >> $GITHUB_OUTPUT
+          
+  merge-final:
+    runs-on: ubuntu-latest
+    needs: hermetic_builds
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{env.owner}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.final_amd64_image }}:${{ env.image_tag }}
+            ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.final_arm64_image }}:${{ env.image_tag }}
+                
+      - name: Create manifest list and push
+        run: |
+          mkdir -p /tmp/digests/go-final
+        
+          # Save the digests (you should have them generated earlier in the build process)
+          echo "${{ needs.hermetic_builds.outputs.amd64_digest }}" > /tmp/digests/go-final/amd64
+          echo "${{ needs.hermetic_builds.outputs.arm64_digest }}" > /tmp/digests/go-final/arm64
+
+
+            
+          # Navigate to the directory with the digests
+          cd /tmp/digests/go-final
+
+          ls
+
+          cat amd64
+          cat arm64
+            
+          # Extract tags from the docker-metadata-action bake file (jq parses the file)
+          tags=$(jq -cr '.target."docker-metadata-action".tags | map("-t " + .) | join(" ")' ${{ steps.meta.outputs.bake-file }})
+        
+          # Ensure tags were generated
+          if [[ -z "$tags" ]]; then
+            echo "ERROR: No tags were generated."
+            exit 1
+          fi
+        
+          # Create the multi-arch manifest list using the collected digests
+          docker buildx imagetools create $tags \
+          ${{ env.REGISTRY }}${{ env.owner }}/${{ env.final_image }}@sha256:$(cat amd64) \
+          ${{ env.REGISTRY }}${{ env.owner }}/${{ env.final_image }}@sha256:$(cat arm64)
+        
+          # Push the manifest to Docker Hub
+          docker buildx imagetools push ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.final_image }}:${{ env.image_tag }}
+        
+
+
+
+  artifact:
+    runs-on: ubuntu-latest
+    needs: hermetic_builds
+    permissions:
+      id-token: write
+      packages: write
+      contents: read
+      attestations: write
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{env.owner}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Attest-amd64
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{github.actor}}/${{ env.final_image }}
+          subject-digest: ${{ needs.hermetic_builds.outputs.amd64_digest }}
+          push-to-registry: true
+
+      - name: Attest-arm64
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{github.actor}}/${{ env.final_image }}
+          subject-digest: ${{ needs.hermetic_builds.outputs.arm64_digest }}
+          push-to-registry: true
+        
+  scan_image:
+    needs: artifact
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Nix
+      uses: DeterminateSystems/nix-installer-action@main
+
+    # Setup Nix development environment make sure to use ./ before the path otherwise nix takes it as a https url
+    - name: Setup Nix development environment
+      uses: nicknovitski/nix-develop@v1
+      with:
+        arguments: ./go-server-example/bsf/.#devShell
+
+    - name: Is hermetic build
+      run: |
+        docker buildx imagetools inspect ${{ env.REGISTRY }}/${{github.actor}}/${{ env.final_image }}:${{ env.image_tag }} --format "{{ json .Provenance.SLSA }}" > slsa.json
+        cat slsa.json
+        if grep -q "https://mobyproject.org/buildkit@v1#hermetic\": true" slsa.json; then
+          echo "Hermetic build"
+        else
+          echo "Not a hermetic build"
+        exit 1
+    # Check for vulnerabilities :)
+    - name: Check for vulnerabilities
+      run: grype ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_image }}:${{ env.image_tag }} --only-fixed --fail-on low
+
+
+  sign-final-image:
+    needs: scan_image
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{env.owner}}
+          password: ${{secrets.GITHUB_TOKEN}}
+
+
+      - name: Sign and push image
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          final_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{github.actor}}/${{ env.final_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+          cosign sign --yes ${{ env.REGISTRY }}/${{github.actor}}/${{ env.final_image }}@${final_img_digest}
+          cosign verify \
+          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_image }}@${final_img_digest}
+          cosign triangulate ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_image }}@${final_img_digest}
