@@ -22,7 +22,7 @@ jobs:
       - name: Run Prepare Action
         uses: buildsafedev/multiarch-build--action/prepare-action@main
         with:
-          oci_registry_username: ${{ github.actor }}
+          oci_registry_username: ${{ env.owner}}
           oci_registry_password: ${{ secrets.GITHUB_TOKEN }}
           image_name: ${{ env.owner }}/${{ env.dev_image }}
           ociBlock: go-dev
@@ -36,7 +36,7 @@ jobs:
       - name: Run Prepare Action
         uses: buildsafedev/multiarch-build--action/prepare-action@main
         with:
-          oci_registry_username: ${{ github.actor }}
+          oci_registry_username: ${{ env.owner }}
           oci_registry_password: ${{ secrets.GITHUB_TOKEN }}
           image_name: ${{ env.owner }}/${{ env.runtime_image }}
           ociBlock: go-runtime
@@ -57,7 +57,7 @@ jobs:
       - name: Run Build Action
         uses: buildsafedev/multiarch-build--action/build-action@main
         with:
-          oci_registry_username: ${{ github.actor }}
+          oci_registry_username: ${{ env.owner }}
           oci_registry_password: ${{ secrets.GITHUB_TOKEN }}
           ociBlocks: go-dev go-runtime
           directory: 'go-server-example'
@@ -74,7 +74,7 @@ jobs:
       - name: Run Merge Action
         uses: buildsafedev/multiarch-build--action/merge-action@main
         with:
-          oci_registry_username: ${{ github.actor }}
+          oci_registry_username: ${{ env.owner }}
           oci_registry_password: ${{ secrets.GITHUB_TOKEN }}
           image_name: ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}
           ociBlock: go-dev
@@ -90,7 +90,7 @@ jobs:
       - name: Run Merge Action
         uses: buildsafedev/multiarch-build--action/merge-action@main
         with:
-          oci_registry_username: ${{ github.actor }}
+          oci_registry_username: ${{ env.owner }}
           oci_registry_password: ${{ secrets.GITHUB_TOKEN }}
           image_name: ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}
           ociBlock: go-runtime
@@ -112,7 +112,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{github.actor}}
+          username: ${{env.owner}}
           password: ${{secrets.GITHUB_TOKEN}}
 
 
@@ -171,7 +171,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{github.actor}}
+          username: ${{env.owner}}
           password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Build hermetic image amd64
@@ -227,7 +227,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{github.actor}}
+          username: ${{env.owner}}
           password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Docker meta
@@ -289,7 +289,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{github.actor}}
+          username: ${{env.owner}}
           password: ${{secrets.GITHUB_TOKEN}}
 
       - name: Attest-amd64
@@ -348,7 +348,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{github.actor}}
+          username: ${{env.owner}}
           password: ${{secrets.GITHUB_TOKEN}}
 
 
