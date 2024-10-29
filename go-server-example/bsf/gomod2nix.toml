@@ -6,4 +6,4 @@ schema = 3
     hash = "sha256-EnxsWdEUPYid+aZ9H4/iMTs1XMvCLbXZRDyvj89Ebms="
   [mod."golang.org/x/sys"]
     version = "v0.0.0-20220715151400-c0bba94af5f8"
-    hash = "sha256-8LGu1Rwel+ZWaOXHjOxoQDthPPDpJxWD9SoXdCJQq04="
+    hash = "sha256-U/kS1gLvZxZn7yPsFCll93iii+Ug8exwTZHbNijXPW0="
