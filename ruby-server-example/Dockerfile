@@ -4,7 +4,7 @@ FROM ruby:3.1-alpine AS build
 RUN apk add --no-cache build-base libxml2-dev libxslt-dev tzdata
 WORKDIR /src
 # Copy the Gemfile and Gemfile.lock into the container
-COPY Gemfile Gemfile.lock /src/
+COPY Gemfile /src/
 # Install the required gems
 RUN bundle install
 # Copy the rest of the application files to the container
