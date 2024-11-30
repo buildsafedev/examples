@@ -64,13 +64,13 @@ jobs:
   hermetic_builds:
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      amd64_digest: ${{ steps.build_amd64.outputs.digest }}
     permissions:
       id-token: write
       packages: write
       contents: read
       attestations: write
-    outputs:
-      amd64_digest: ${{ steps.build-amd64.outputs.digest }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -81,24 +81,33 @@ jobs:
           registry: ghcr.io
           username: ${{env.owner}}
           password: ${{secrets.GITHUB_TOKEN}}
+        
 
+      - name: Download meta bake definition
+        uses: actions/download-artifact@v4
+        with:
+         name: bake-meta-${{ format('go-dev', 'go-runtime') }}
+         path: /tmp
+    
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+    
+      - name: Verify digest files after download
+        shell: bash
+        run: |
+          echo "Downloaded digest files:"
       - name: Build hermetic image amd64
-        id: build-amd64
+        id: build_amd64
         working-directory: go-server-example
         run: |
-          # Verify image manifests exist
-          base_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
-          if [ -z "$base_img_digest" ]; then
-            echo "Base image manifest not found"
-            exit 1
-          fi
+          base_img_digest=$(printf "sha256:%s" "$(basename /tmp/digests/go-dev/*)")
+          runtime_img_digest=$(printf "sha256:%s" "$(basename /tmp/digests/go-runtime/*)")
 
-          runtime_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
-          if [ -z "$runtime_img_digest" ]; then
-            echo "Runtime image manifest not found"
-            exit 1
-          fi
-          
+
           docker buildx create --name mybuilder --use --driver docker-container
           docker buildx build \
             --build-arg BASE_IMAGE=${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest} \
@@ -143,6 +152,9 @@ jobs:
     needs: artifact
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
     - name: Install Nix
       uses: DeterminateSystems/nix-installer-action@main
 
@@ -150,6 +162,13 @@ jobs:
       uses: nicknovitski/nix-develop@v1
       with:
         arguments: ./go-server-example/bsf/.#devShell
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{env.owner}}
+        password: ${{secrets.GITHUB_TOKEN}}
 
     - name: Is hermetic build
       run: |
