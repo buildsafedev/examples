@@ -207,10 +207,10 @@ jobs:
         COSIGN_EXPERIMENTAL: "true"
       run: |
           final_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
-          cosign sign --yes ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}@${{final_img_digest}}
+          cosign sign --yes ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}@$final_img_digest
           cosign verify \
           --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
           --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-          ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}@${{final_img_digest}}
-          cosign triangulate ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}@${{final_img_digest}}
+          ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}@$final_img_digest
+          cosign triangulate ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}@$final_img_digest
     
