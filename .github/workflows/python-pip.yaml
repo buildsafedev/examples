@@ -1,4 +1,6 @@
 name: python-pip-base
+env :
+  image_tag: v1
 
 on:
   push:
@@ -16,7 +18,7 @@ jobs:
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
           image_name: holiodin01/python-pip-base
           ociBlock: python-dev
-          tag: v0.1.0
+          tag:  ${{ env.image_tag }}
 
   build:
     needs: prepare
@@ -51,4 +53,137 @@ jobs:
           oci_registry_password: ${{ secrets.DOCKER_PASSWORD }}
           image_name: holiodin01/python-pip-base
           ociBlock: python-dev
-          tag: v0.1.0
+          tag:  ${{ env.image_tag }}
+
+  sign-the-image:
+    needs: merge
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@v3.7.0
+      with:
+        cosign-release: 'v2.4.1'
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Sign and push image
+      env:
+        COSIGN_EXPERIMENTAL: "true"
+      run: |
+        # Fetch the digest for the base image
+        base_img_digest=$(docker manifest inspect holiodin01/python-pip-base:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+
+        # Use the digest in the cosign commands
+        cosign sign --yes holiodin01/python-pip-base@${base_img_digest}
+        cosign verify \
+        --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/python-pip.yaml@refs/heads/multiarch-builds" \
+        --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+        holiodin01/python-pip-base@${base_img_digest}
+        cosign triangulate holiodin01/python-pip-base@${base_img_digest}
+
+        base_img_digest_arm64=$(docker manifest inspect holiodin01/python-pip-base:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .digest')
+        cosign sign --yes holiodin01/python-pip-base@${base_img_digest_arm64}
+        cosign verify \
+         --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/python-pip.yaml@refs/heads/multiarch-builds" \
+        --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+        holiodin01/python-pip-base@${base_img_digest_arm64}
+
+        cosign triangulate holiodin01/python-pip-base@${base_img_digest_arm64}
+
+  hermetic_builds:
+    needs: merge
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name : Build hermetic image
+        working-directory: python-pip
+        run: |
+          base_img_digest=$(docker manifest inspect holiodin01/python-pip-base:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+
+          docker buildx create --name mybuilder --use --driver docker-container
+
+          docker buildx build \
+            --build-arg BASE_IMAGE=holiodin01/python-pip-base@${base_img_digest} \
+            --no-cache \
+            --tag holiodin01/python-pip-final:${{ env.image_tag }} \
+            --network=none \
+            --attest type=provenance,mode=min \
+            --platform=linux/amd64 \
+            --push \
+            --output type=oci \
+            https://github.com/buildsafedev/examples.git\#multiarch-builds:python-pip
+        
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+      
+          # Setup Nix development environment make sure to use ./ before the path otherwise nix takes it as a https url
+      - name: Setup Nix development environment
+        uses: nicknovitski/nix-develop@v1
+        with:
+          arguments: ./python-pip/bsf/.#devShell
+      
+      - name: Is hermetic build
+        run: |
+            docker buildx imagetools inspect holiodin01/python-pip-final:${{ env.image_tag }} --format "{{ json .Provenance.SLSA }}" > slsa.json
+            cat slsa.json
+            if grep -q "https://mobyproject.org/buildkit@v1#hermetic\": true" slsa.json; then
+              echo "Hermetic build"
+            else
+              echo "Not a hermetic build"
+              exit 1
+            fi
+          
+    
+
+      # Check for vulnerabilities :)
+      - name: Check for vulnerabilities
+        run: |
+          grype holiodin01/python-pip-final:${{ env.image_tag }} --only-fixed --fail-on low
+          
+  sign-final-image:
+    needs: hermetic_builds
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+      - name: Sign and push image
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+
+          final_img_digest=$(docker manifest inspect holiodin01/python-pip-final:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+
+          cosign sign --yes holiodin01/python-pip-final@${final_img_digest}
+          cosign verify \
+          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/python-pip.yaml@refs/heads/multiarch-builds" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          holiodin01/python-pip-final@${final_img_digest}
+
+          cosign triangulate holiodin01/python-pip-final@${final_img_digest}
