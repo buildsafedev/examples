@@ -58,7 +58,7 @@ jobs:
           oci_registry_username: ${{ env.owner }}
           oci_registry_password: ${{ secrets.GITHUB_TOKEN }}
           ociBlocks: go-dev go-runtime
-          directory: 'go-server-example'
+          directory: "go-server-example"
           registry: ghcr.io
 
   hermetic_builds:
@@ -81,21 +81,20 @@ jobs:
           registry: ghcr.io
           username: ${{env.owner}}
           password: ${{secrets.GITHUB_TOKEN}}
-        
 
       - name: Download meta bake definition
         uses: actions/download-artifact@v4
         with:
-         name: bake-meta-${{ format('go-dev', 'go-runtime') }}
-         path: /tmp
-    
+          name: bake-meta-${{ format('go-dev', 'go-runtime') }}
+          path: /tmp
+
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
           path: /tmp/digests
           pattern: digests-*
           merge-multiple: true
-    
+
       - name: Verify digest files after download
         shell: bash
         run: |
@@ -106,8 +105,6 @@ jobs:
         run: |
           base_img_digest=$(printf "sha256:%s" "$(basename /tmp/digests/go-dev/*)")
           runtime_img_digest=$(printf "sha256:%s" "$(basename /tmp/digests/go-runtime/*)")
-
-
           docker buildx create --name mybuilder --use --driver docker-container
           docker buildx build \
             --build-arg BASE_IMAGE=${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest} \
@@ -120,11 +117,9 @@ jobs:
             --push \
             --output type=image \
             https://github.com/buildsafedev/examples.git\#multiarch-builds:go-server-example
-
           # Get the digest of the built image
           amd64_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.final_amd64_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
           echo "digest=$amd64_digest" >> $GITHUB_OUTPUT
-
   artifact:
     runs-on: ubuntu-latest
     needs: hermetic_builds
@@ -151,66 +146,70 @@ jobs:
   scan_image:
     needs: artifact
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Install Nix
-      uses: DeterminateSystems/nix-installer-action@main
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
 
-    - name: Setup Nix development environment
-      uses: nicknovitski/nix-develop@v1
-      with:
-        arguments: ./go-server-example/bsf/.#devShell
+      - name: Setup Nix development environment
+        uses: nicknovitski/nix-develop@v1
+        with:
+          arguments: ./go-server-example/bsf/.#devShell
 
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{env.owner}}
-        password: ${{secrets.GITHUB_TOKEN}}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{env.owner}}
+          password: ${{secrets.GITHUB_TOKEN}}
 
-    - name: Is hermetic build
-      run: |
-        docker buildx imagetools inspect ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}:${{ env.image_tag }} --format "{{ json .Provenance.SLSA }}" > slsa.json
-        cat slsa.json
-        if grep -q "https://mobyproject.org/buildkit@v1#hermetic\": true" slsa.json; then
-          echo "Hermetic build"
-        else
-          echo "Not a hermetic build"
-          exit 1
-        fi
+      - name: Is hermetic build
+        run: |
+          docker buildx imagetools inspect ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}:${{ env.image_tag }} --format "{{ json .Provenance.SLSA }}" > slsa.json
+          cat slsa.json
+          if grep -q "https://mobyproject.org/buildkit@v1#hermetic\": true" slsa.json; then
+            echo "Hermetic build"
+          else
+            echo "Not a hermetic build"
+            exit 1
+          fi
 
-    - name: Check for vulnerabilities
-      run: grype ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}:${{ env.image_tag }} --only-fixed --fail-on low
+      - name: Check for vulnerabilities
+        run: grype ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}:${{ env.image_tag }} --only-fixed --fail-on low
+  
 
-  sign-final-image:
+  sign_image:
     needs: scan_image
     runs-on: ubuntu-latest
     permissions:
+      contents: read
+      packages: write
       id-token: write
     steps:
-    - name: Install Cosign
-      uses: sigstore/cosign-installer@v3.7.0
-      with:
-        cosign-release: 'v2.4.1'
-    
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{env.owner}}
-        password: ${{secrets.GITHUB_TOKEN}}
-    
-    - name: Sign and push image
-      env:
-        COSIGN_EXPERIMENTAL: "true"
-      run: |
-          final_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
-          cosign sign --yes ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}@$final_img_digest
-          cosign verify \
-          --certificate-identity "https://github.com/buildsafedev/examples/.github/workflows/go-base.yaml@refs/heads/multiarch-builds" \
-          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-          ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}@$final_img_digest
-          cosign triangulate ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}@$final_img_digest
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{env.owner}}
+          password: ${{secrets.GITHUB_TOKEN}}
+          
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+        with:
+         cosign-release: 'v2.4.1'
+
+      - name: Sign and push image
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+           final_img_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
+           cosign sign --yes ${{ env.REGISTRY }}/${{env.owner}}/${{ env.final_amd64_image }}@${final_img_digest}    
+
     
