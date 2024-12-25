@@ -1,4 +1,4 @@
-FROM ttl.sh/go-base:dev AS build
+FROM ttl.sh/go-base-dev:v1 AS build
 
 WORKDIR /src
 
@@ -10,7 +10,7 @@ RUN mkdir -p /tmp
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/server .
 
 # Stage 2: Create the final image
-FROM ttl.sh/go-base:runtime AS final
+FROM ttl.sh/go-base:runtime:v1 AS final
 
 WORKDIR /app
 

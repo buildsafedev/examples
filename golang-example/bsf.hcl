@@ -4,8 +4,8 @@ packages {
   runtime     = ["cacert@3.95"]
 }
 
-oci "build" {
-  name          = "ttl.sh/go-base"
+oci "go-dev" {
+  name          = "ttl.sh/go-base-dev"
   layers        = ["split(packages.runtime)", "split(packages.dev)"]
   isBase        = true
   cmd           = []
@@ -15,8 +15,8 @@ oci "build" {
   importConfigs = []
 }
 
-oci "runtime" {
-  name          = "ttl.sh/go-base"
+oci "go-runtime" {
+  name          = "ttl.sh/go-base-runtime"
   layers        = ["split(packages.runtime)"]
   isBase        = true
   cmd           = []
