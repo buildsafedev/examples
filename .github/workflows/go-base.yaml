@@ -61,7 +61,6 @@ jobs:
           directory: "golang-example"
           registry: ttl.sh
 
-
   final-img-build:
     runs-on: ubuntu-latest
     needs: build
@@ -93,7 +92,7 @@ jobs:
         shell: bash
         run: |
           echo "Downloaded digest files:"
-      - name: Build hermetic image amd64
+      - name: Build image amd64
         id: build_amd64
         working-directory: golang-example
         run: |
@@ -101,14 +100,13 @@ jobs:
           runtime_img_digest=$(printf "sha256:%s" "$(basename /tmp/digests/go-runtime/*)")
           docker buildx create --name mybuilder --use --driver docker-container
           docker buildx build \
-            --build-arg BASE_IMAGE=${{ env.REGISTRY }}/${{ env.owner }}/${{ env.dev_image }}@${base_img_digest} \
-            --build-arg RUNTIME_IMAGE=${{ env.REGISTRY }}/${{ env.owner }}/${{ env.runtime_image }}@${runtime_img_digest} \
-            --no-cache \
-            --tag ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.final_amd64_image }}:${{ env.image_tag }} \
-            --attest type=provenance,mode=min \
-            --platform=linux/amd64 \
-            --push \
-            --output type=image           
+          --no-cache \
+          --tag ttl.sh/buildsafedev/go-final-amd64:v1 \
+          --attest type=provenance,mode=min \
+          --platform=linux/amd64 \
+          --push \
+          --output type=image \
+          . 
 
           amd64_digest=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.owner }}/${{ env.final_amd64_image }}:${{ env.image_tag }} | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest')
           echo "digest=$amd64_digest" >> $GITHUB_OUTPUT
@@ -130,7 +128,7 @@ jobs:
       - name: Setup Nix development environment
         uses: nicknovitski/nix-develop@v1
         with:
-          arguments: ./go-server-example/bsf/.#devShell
+          arguments: ./golang-example/bsf/.#devShell
 
 
       - name: Is hermetic build

@@ -1,6 +1,6 @@
 
 packages {
-  development = ["bash@5.2.15", "coreutils-full@9.5", "cosign@~2.4.0", "grype@~0.80.2", "python3@~3.12.5", "poetry@~1.8.3"]
+  development = ["bash@5.2.15", "coreutils-full@9.5", "cosign@~2.4.1", "grype@~0.80.2", "poetry@~1.8.5", "python3@~3.12.8"]
   runtime     = ["cacert@3.95"]
 }
 
@@ -14,7 +14,7 @@ poetryapp {
 }
 
 oci "python-dev" {
-  name          = "docker.io/holiodin01/python-base"
+  name          = "ttl.sh/buildsafedev/python-base"
   layers        = ["packages.runtime + packages.dev"]
   isBase        = true
   cmd           = []

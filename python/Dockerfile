@@ -1,4 +1,4 @@
-FROM holiodin01/python-base:v0.1.0 as base
+FROM  ttl.sh/buildsafedev/python-base@sha256:baf6b6ce8e7beb4abaaf7b61a44feae0a3d8df99737c376044db8ac43b259d0b
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1

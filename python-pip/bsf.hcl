@@ -5,7 +5,7 @@ packages {
 }
 
 oci "python-dev" {
-  name          = "docker.io/holiodin01/python-pip-base"
+  name          = "ttl.sh/buildsafedev/python-pip-base"
   layers        = ["packages.runtime + packages.dev"]
   isBase        = true
   cmd           = []

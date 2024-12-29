@@ -123,6 +123,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-47f1ce82e5d33c5d737c7fb2b3e83036f0f8963a": {
+      "locked": {
+        "lastModified": 1733788591,
+        "narHash": "sha256-kNsXSr/CwVP3c+O0XFvQeWBvuXYsj17w2Gg3Dv8HadM=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "47f1ce82e5d33c5d737c7fb2b3e83036f0f8963a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "47f1ce82e5d33c5d737c7fb2b3e83036f0f8963a",
+        "type": "github"
+      }
+    },
     "nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4": {
       "locked": {
         "lastModified": 1716993062,
@@ -152,6 +168,38 @@
         "owner": "nixos",
         "repo": "nixpkgs",
         "rev": "ac5c1886fd9fe49748d7ab80accc4c847481df14",
+        "type": "github"
+      }
+    },
+    "nixpkgs-cde85e73739930e3fd10216416ca1bcc57138a7a": {
+      "locked": {
+        "lastModified": 1734997524,
+        "narHash": "sha256-KzSDh4gkdXExuddfg++hFFJLoQ1C0C2zFmcASW3/0co=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "cde85e73739930e3fd10216416ca1bcc57138a7a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "cde85e73739930e3fd10216416ca1bcc57138a7a",
+        "type": "github"
+      }
+    },
+    "nixpkgs-d4f247e89f6e10120f911e2e2d2254a050d0f732": {
+      "locked": {
+        "lastModified": 1728863046,
+        "narHash": "sha256-DZBO2465PL5V89e8hFSJewyH4QbCPpW3ssws7ckT/0A=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "d4f247e89f6e10120f911e2e2d2254a050d0f732",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "d4f247e89f6e10120f911e2e2d2254a050d0f732",
         "type": "github"
       }
     },
@@ -201,8 +249,11 @@
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7": "nixpkgs-1ebb7d7bba2953a4223956cfb5f068b0095f84a7",
         "nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191": "nixpkgs-2af19cfb6aa40768c4bbefd801a136270e099191",
+        "nixpkgs-47f1ce82e5d33c5d737c7fb2b3e83036f0f8963a": "nixpkgs-47f1ce82e5d33c5d737c7fb2b3e83036f0f8963a",
         "nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4": "nixpkgs-7445ccd775d8b892fc56448d17345443a05f7fb4",
         "nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14": "nixpkgs-ac5c1886fd9fe49748d7ab80accc4c847481df14",
+        "nixpkgs-cde85e73739930e3fd10216416ca1bcc57138a7a": "nixpkgs-cde85e73739930e3fd10216416ca1bcc57138a7a",
+        "nixpkgs-d4f247e89f6e10120f911e2e2d2254a050d0f732": "nixpkgs-d4f247e89f6e10120f911e2e2d2254a050d0f732",
         "poetry2nix": "poetry2nix"
       }
     },

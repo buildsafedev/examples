@@ -23,7 +23,7 @@ rustapp {
 }
 
 oci "rust-dev" {
-  name          = "docker.io/holiodin01/rust-base-dev"
+  name          = "ttl.sh/buildsafedev/rust-base-dev"
   layers        = ["packages.dev"]
   isBase        = true
   cmd           = []
@@ -33,7 +33,7 @@ oci "rust-dev" {
   importConfigs = []
 }
 oci "rust-runtime" {
-  name          = "docker.io/holiodin01/rust-base-runtime"
+  name          = "ttl.sh/buildsafedev/rust-base-runtime"
   layers        = ["packages.runtime"]
   isBase        = true
   cmd           = []
